@@ -1,91 +1,395 @@
 <html>
 
 <head>
-    <title>Url Shortner</title>
-    <meta content='width=device-width, initial-scale=1' name='viewport'/>
-    <!-- JS to submit url to /api/generate and display the result in #result element -->
-    <script>
-        function submitUrl() {
-            var url = document.getElementById("url").value;
-            var request = new XMLHttpRequest();
-            request.open("POST", "/api/generate", true);
-            request.setRequestHeader("Content-Type", "application/json");
-            request.onreadystatechange = function () {
-                if (request.readyState === 4 && request.status === 200) {
-                    var response = request.responseText;
-                    var shortcode = response.replace(/['"]+/g, '');
-                    var shorturl = window.location.origin + "/" + shortcode;
-                    document.getElementById("result").innerHTML = `<a href="${shorturl}" style="color: #0c5fac;margin-left: 40px">${shorturl}</a>`;
-                    document.getElementById("url").value = "";
-                }
-            };
-            request.send(JSON.stringify({ url: url }));
+  <title>Password Generator</title>
+  <meta content='width=device-width, initial-scale=1' name='viewport' />
+  <meta name="description" content="Secure password generator">
+  <meta name="keywords" content="password, generator, security, strong passwords, password strength">
+  <script>
+    window.onload = function () {
+      var hostname = window.location.hostname.split('.').slice(-2).join('.');
+      var hostnameparts = hostname.split('.');
+
+      if (hostnameparts.length == 1) {
+        hostname = hostnameparts[0].toLowerCase();
+      } else if (hostnameparts.length == 2) {
+        hostname = hostnameparts[0].toLowerCase() + "." + hostnameparts[1].toUpperCase();
+      }
+
+      document.getElementById("host").innerHTML = hostname;
+    };
+  </script>
+  <script>
+    const default_options = {
+      plength: 12,
+      includeLowercase: true,
+      includeUppercase: true,
+      includeNumeric: true,
+      includeSpecial: true,
+      includeSimilar: false,
+      includeUnambiguous: true,
+      excludeSimilar: true,
+    };
+
+    function generatePassword(length, options) {
+      const {
+        includeLowercase = true,
+        includeUppercase = true,
+        includeNumeric = true,
+        includeSpecial = true,
+        includeSimilar = false,
+        includeUnambiguous = true,
+        excludeSimilar = true,
+        plength = 12
+      } = options;
+
+      const characters = {
+        lowercase: 'abcdefghijklmnopqrstuvwxyz',
+        uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        numeric: '0123456789',
+        special: '!@#$%^&*()-_+=[]{}|:<>,.?/~`',
+        similar: 'iIlL1',
+        unambiguous: 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789',
+      };
+
+      let validCharacters = [
+        ...(includeLowercase ? characters.lowercase : ''),
+        ...(includeUppercase ? characters.uppercase : ''),
+        ...(includeNumeric ? characters.numeric : ''),
+        ...(includeSimilar ? characters.similar : ''),
+        ...(includeUnambiguous ? characters.unambiguous : ''),
+      ].join('');
+
+      if (excludeSimilar) {
+        validCharacters = [...validCharacters].filter(c => !characters.similar.includes(c)).join('');
+      }
+
+      if (validCharacters.length === 0) {
+        throw new Error('At least one character type must be included in the password');
+      }
+
+      let password = '';
+      let min_special_count = Math.ceil(1, Math.floor(length * 0.1));
+      let max_special_count = Math.floor(length * 0.2);
+      let special_count = 0;
+      while (password.length < length) {
+        while (password.length < length) {
+          if ((includeSpecial && Math.random() < 0.1) && special_count < max_special_count) {
+            password += characters.special[Math.floor(Math.random() * characters.special.length)];
+            special_count++;
+          } else {
+            password += validCharacters[Math.floor(Math.random() * validCharacters.length)];
+          }
         }
 
-        window.onload = function () {
-            document.getElementById("submit").addEventListener("click", submitUrl);
-
-            // get the domain name only
-            var hostname = window.location.hostname.split('.').slice(-2).join('.');
-
-            // hostnameparts
-            var hostnameparts = hostname.split('.');
-
-            if (hostnameparts.length == 1) {
-                hostname = hostnameparts[0].toLowerCase();
-            } else if (hostnameparts.length == 2) {
-                hostname = hostnameparts[0].toLowerCase() + "." + hostnameparts[1].toUpperCase();
+        if (includeSpecial) {
+          // If there are less than min_special_count special characters, add some randomly.
+          if (special_count < min_special_count) {
+            while (special_count < min_special_count) {
+              let index = Math.floor(Math.random() * password.length);
+              password = password.slice(0, index) + characters.special[Math.floor(Math.random() * characters.special.length)] + password.slice(index);
+              special_count++;
             }
+          }
+        }
 
-            // set the hostname in the title
-            document.getElementById("host").innerHTML = hostname;
+        // Remove random characters if it's too long
+        while (password.length > length) {
+          let index = Math.floor(Math.random() * password.length);
+          password = password.slice(0, index) + password.slice(index + 1);
+        }
+      }
 
-            // When the user presses enter, submit the url
-            document.getElementById("url").addEventListener("keyup", function (event) {
-                if (event.keyCode === 13) {
-                    event.preventDefault();
-                    document.getElementById("submit").click();
-                }
-            });
+      return password;
+    }
+    function save_options(options) {
+      var storage = {};
+      // options is an object with name/value pairs
+      for (var key in options) {
+        storage[key] = options[key]
+      }
+
+      localStorage.setItem('options', JSON.stringify(storage));
+    }
+    function load_options() {
+      var local_storage_options = localStorage.getItem('options');
+
+      if (local_storage_options) {
+        var options = JSON.parse(local_storage_options);
+        return options
+      }
+
+      return null;
+    }
+    function reset_form() {
+      // reset the form to default_options
+      var form = document.getElementById('generate-password-form');
+      for (var key in default_options) {
+        var element = form.elements[key];
+        if (element) {
+          if (element instanceof HTMLInputElement && element.type == 'checkbox') {
+            element.checked = default_options[key] == true;
+          } else {
+            element.value = default_options[key];
+          }
+        }
+      }
+    }
+    function copyPassword() {
+      // Select the password input
+      var passwordInput = document.querySelector('#password');
+
+      // Select the text in the input
+      passwordInput.select();
+
+      // Copy the text to the clipboard
+      document.execCommand('copy');
+    }
+  </script>
+  <script>
+    window.onload = function () {
+      const form = document.getElementById('generate-password-form');
+
+      let options = load_options();
+      if (options) {
+        console.log(options)
+        for (var key in options) {
+          var element = form.elements[key];
+          if (element) {
+            if (element instanceof HTMLInputElement && element.type == 'checkbox') {
+              element.checked = options[key] == true;
+            } else {
+              element.value = options[key];
+            }
+          }
+        }
+      }
+
+      const passwordInput = document.getElementById('password');
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+
+        const length = Number(form.elements.plength.value);
+        let options = {
+          plength: form.elements.plength.value,
+          includeLowercase: form.elements.includeLowercase.checked,
+          includeUppercase: form.elements.includeUppercase.checked,
+          includeNumeric: form.elements.includeNumeric.checked,
+          includeSpecial: form.elements.includeSpecial.checked,
+          includeSimilar: form.elements.includeSimilar.checked,
+          includeUnambiguous: form.elements.includeUnambiguous.checked,
+          excludeSimilar: form.elements.excludeSimilar.checked,
         };
-    </script>
+
+        const password = generatePassword(length, options);
+        passwordInput.value = password;
+        save_options(options);
+      });
+
+      form.addEventListener('reset', event => {
+        event.preventDefault();
+        reset_form();
+      });
+
+      form.elements.copypassword.addEventListener('click', event => {
+        event.preventDefault();
+        copyPassword();
+      });
+
+      // Generate a password
+      form.dispatchEvent(new Event('submit', { cancelable: true }));
+    };
+  </script>
+  <style>
+    .form-control {
+      display: block;
+      width: 100%;
+      height: calc(1.5em + .75rem + 2px);
+      padding: .375rem .75rem;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #495057;
+      background-color: #fff;
+      background-clip: padding-box;
+      border: 1px solid #ced4da;
+      border-radius: .25rem;
+      transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+    .form-control:focus {
+      color: #495057;
+      background-color: #fff;
+      border-color: #80bdff;
+      outline: 0;
+      box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-check {
+      position: relative;
+      display: block;
+      padding-left: 1.25rem;
+    }
+
+    .form-check-input {
+      position: absolute;
+      margin-top: .3rem;
+      margin-left: -1.25rem;
+    }
+
+    .form-check-label {
+      margin-bottom: 0;
+    }
+
+    .btn {
+      display: inline-block;
+      font-weight: 400;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: middle;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      border: 1px solid transparent;
+      padding: .375rem .75rem;
+      font-size: 1rem;
+      line-height: 1.5;
+      border-radius: .25rem;
+      transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+    .btn-primary {
+      color: #fff;
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+      color: #fff;
+      background-color: #0069d9;
+      border-color: #0062cc;
+    }
+
+    .btn-secondary {
+      color: #fff;
+      background-color: #6c757d;
+      border-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+      color: #fff;
+      background-color: #5a6268;
+      border-color: #545b62;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+    }
+
+    #copypassword {
+      display: flex;
+      align-items: center;
+    }
+
+    #copypassword .password-input__icon {
+      margin-right: 10px;
+    }
+  </style>
 </head>
 
 <body style="padding: 0px; margin:0px; background-color: #171026;">
-    <div id="main" style="padding: 1px 20px 20px 20px; background-color: white">
-        <h1 style="margin-bottom: 6px;"><span id="host" style="color: #0c5fac"></span> &nbsp;<i style="color: #3f3f3f; font-size: smaller">url shortener</i></h1>
-        <i style="color: #a3b5c5">&nbsp;&nbsp;No Ads, No Third Party Trackers, No BS</i>
-        <br />
-        <br />
-        <br />
-        <div>
-            <input type="text" id="url" name="url" placeholder="Enter URL" style="min-width: 220px;" autofocus>
-            <input type="button" id="submit" value="Shorten">
-        </div>
-        <br />
-        <br />
-        <div id="result" style="min-height: 30px"></div>
-        <br />
+  <div id="main" style="padding: 1px 20px 20px 20px; background-color: white">
+    <h1 style="margin-bottom: 6px;"><span id="host" style="color: #0c5fac"></span> &nbsp;<i
+        style="color: #3f3f3f; font-size: smaller">password generator</i></h1>
+    <i style="color: #a3b5c5">&nbsp;&nbsp;No Ads, No Third Party Trackers, No BS</i>
+    <br />
+    <br />
+    <div>
+      <div class="container">
+        <form id="generate-password-form" class="form">
+          <div class="form-group">
+            <label for="plength">Length:</label>
+            <input type="number" id="plength" name="plength" value="12" min="1" max="100" required class="form-control">
+          </div>
+          <div class="form-group form-check">
+            <input type="checkbox" name="includeLowercase" checked class="form-check-input">
+            <label class="form-check-label">Lowercase letters</label>
+          </div>
+          <div class="form-group form-check">
+            <input type="checkbox" name="includeUppercase" checked class="form-check-input">
+            <label class="form-check-label">Uppercase letters</label>
+          </div>
+          <div class="form-group form-check">
+            <input type="checkbox" name="includeNumeric" checked class="form-check-input">
+            <label class="form-check-label">Numbers</label>
+          </div>
+          <div class="form-group form-check">
+            <input type="checkbox" name="includeSpecial" checked class="form-check-input">
+            <label class="form-check-label">Special characters</label>
+          </div>
+          <div class="form-group form-check">
+            <input type="checkbox" name="includeUnambiguous" class="form-check-input">
+            <label class="form-check-label">Unambiguous characters</label>
+          </div>
+          <div class="form-group form-check">
+            <input type="checkbox" name="excludeSimilar" class="form-check-input">
+            <label class="form-check-label">Exclude similar characters</label>
+          </div>
+          <div class="form-group form-check">
+            <input type="checkbox" name="includeSimilar" class="form-check-input">
+            <label class="form-check-label">Similar characters</label>
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">Generate password</button>
+            <button type="reset" class="btn btn-secondary">Reset</button>
+          </div>
+          <div id="password-container" class="form-group">
+            <label for="password">Password:</label>
+            <input type="text" id="password" readonly class="form-control">
+          </div>
+          <div class="form-group">
+            <button type="button" id="copypassword" class="btn btn-primary">
+              <svg class="password-input__icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+              Copy password&nbsp;
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-    <hr style="margin: 0px;border: 1px solid #276fd7;"/>
-    <div id="footer" style="padding: 20px; margin: 0px;">
-        <div style="font-size: small;border: 6px solid #d74a4a;border-radius: 3px;background-color: #dfdaff;padding: 0px 20px;max-width: 500px; margin-top: 4px;">
-            <p style="font-size:large; font-weight: bold; color: #0c5fac">Help Support this Project</p>
-            <p>Hi there! I'm glad you're interested in this project.</p>
-            <p>I host this site at a loss and use no tracking or ads.</p>
-            <p>I believe we all deserve quality software that doesn't focus on investors, corporations and the bottom dollar...just a good solid user experience.</p>
-            <p>You can support this site by donating through the following platforms:</p>
-            <ul>
-                <li>
-                <a href="https://www.paypal.com/donate/?hosted_button_id=GJP29NBGZ33B4" style="color: #0c5fac" target="_blank">PayPal</a>
-                </li>
-                <li>
-                <a href="https://github.com/sponsors/kellyelton" style="color: #0c5fac" target="_blank">Sponsor on GitHub</a>
-                </li>
-            </ul>
-            <p>Thank you so much for using this site and all of your support! My family and I appreciate it greatly!</p>
-        </div>  
+  </div>
+  <hr style="margin: 0px;border: 1px solid #276fd7;" />
+  <div id="footer" style="padding: 20px; margin: 0px;">
+    <div
+      style="font-size: small;border: 6px solid #d74a4a;border-radius: 3px;background-color: #dfdaff;padding: 0px 20px;max-width: 500px; margin-top: 4px;">
+      <a id="supportlink" href="#supportlink"><p style="font-size:large; font-weight: bold; color: #0c5fac">Help Support this Project</p></a>
+      <p>Hi there! I'm glad you're interested in this project.</p>
+      <p>I host this site at a loss and use no tracking or ads.</p>
+      <p>I believe we all deserve quality software that doesn't focus on investors, corporations and the bottom
+        dollar...just a good solid user experience.</p>
+      <p>You can support this site by donating through the following platforms:</p>
+      <ul>
+        <li>
+          <a href="https://www.paypal.com/donate/?hosted_button_id=GJP29NBGZ33B4" style="color: #0c5fac"
+            target="_blank">PayPal</a>
+        </li>
+        <li>
+          <a href="https://github.com/sponsors/kellyelton" style="color: #0c5fac" target="_blank">Sponsor on GitHub</a>
+        </li>
+      </ul>
+      <p>Thank you so much for using this site and all of your support! My family and I appreciate it greatly!</p>
     </div>
+  </div>
 </body>
 
 </html>

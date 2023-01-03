@@ -4,7 +4,7 @@ using System.Text;
 using System.Security.Cryptography;
 using System.Security;
 
-namespace UrlShortener.Providers;
+namespace PasswordGeneratorSite.Providers;
 
 public sealed class AnonPageViewTracker
 {
