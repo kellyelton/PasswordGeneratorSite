@@ -39,8 +39,7 @@ jobs:
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: |
         Import-Module WebAdministration
-        Stop-Website -Name "pwdgen"
-        Write-Host "Stopped website: pwdgen"
+        Stop-Website -Name "pwdgen"        Write-Host "Stopped website: pwdgen"
       shell: pwsh
       
     - name: Clear deployment folder
@@ -48,8 +47,31 @@ jobs:
       run: |
         $deployPath = "F:\Sites\pwdgen"
         if (Test-Path $deployPath) {
-          Remove-Item -Path "$deployPath\*" -Recurse -Force
-          Write-Host "Cleared deployment folder: $deployPath"
+          $maxAttempts = 3
+          $attempt = 1
+          $success = $false
+          
+          while ($attempt -le $maxAttempts -and -not $success) {
+            try {
+              Write-Host "Attempt $attempt of $maxAttempts to clear deployment folder..."
+              Remove-Item -Path "$deployPath\*" -Recurse -Force -ErrorAction Stop
+              Write-Host "Successfully cleared deployment folder: $deployPath"
+              $success = $true
+            }
+            catch {
+              Write-Host "Attempt $attempt failed: $($_.Exception.Message)"
+              if ($attempt -lt $maxAttempts) {
+                Write-Host "Waiting 5 seconds before retry..."
+                Start-Sleep -Seconds 5
+              }
+              $attempt++
+            }
+          }
+          
+          if (-not $success) {
+            Write-Error "Failed to clear deployment folder after $maxAttempts attempts"
+            exit 1
+          }
         }
       shell: pwsh
       
