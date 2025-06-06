@@ -24,6 +24,7 @@ jobs:
       
     - name: Build
       run: dotnet build src/Server/PasswordGeneratorSite.csproj --no-restore --configuration Release
+      
     - name: Test
       run: dotnet test src/Server/PasswordGeneratorSite.csproj --no-build --configuration Release --verbosity normal
       
@@ -31,15 +32,36 @@ jobs:
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: |
         Import-Module WebAdministration
-        Stop-WebAppPool -Name "pwdgen"
-        Write-Host "Stopped application pool: pwdgen"
+        try {
+          $appPool = Get-WebAppPoolState -Name "pwdgen"
+          if ($appPool.Value -eq "Started") {
+            Stop-WebAppPool -Name "pwdgen"
+            Write-Host "Stopped application pool: pwdgen"
+          } else {
+            Write-Host "Application pool 'pwdgen' is already stopped (state: $($appPool.Value))"
+          }
+        }
+        catch {
+          Write-Host "Could not check or stop application pool 'pwdgen': $($_.Exception.Message)"
+        }
       shell: pwsh
       
     - name: Stop IIS Site
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: |
         Import-Module WebAdministration
-        Stop-Website -Name "pwdgen"        Write-Host "Stopped website: pwdgen"
+        try {
+          $website = Get-WebsiteState -Name "pwdgen"
+          if ($website.Value -eq "Started") {
+            Stop-Website -Name "pwdgen"
+            Write-Host "Stopped website: pwdgen"
+          } else {
+            Write-Host "Website 'pwdgen' is already stopped (state: $($website.Value))"
+          }
+        }
+        catch {
+          Write-Host "Could not check or stop website 'pwdgen': $($_.Exception.Message)"
+        }
       shell: pwsh
       
     - name: Clear deployment folder
