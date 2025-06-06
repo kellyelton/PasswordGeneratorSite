@@ -1,0 +1,82 @@
+name: Build, Test and Deploy
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  build-test-deploy:
+    runs-on: [self-hosted, Windows, X64]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore src/Server/PasswordGeneratorSite.csproj
+      
+    - name: Build
+      run: dotnet build src/Server/PasswordGeneratorSite.csproj --no-restore --configuration Release
+    - name: Test
+      run: dotnet test src/Server/PasswordGeneratorSite.csproj --no-build --configuration Release --verbosity normal
+      
+    - name: Stop IIS Application Pool
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: |
+        Import-Module WebAdministration
+        Stop-WebAppPool -Name "pwdgen"
+        Write-Host "Stopped application pool: pwdgen"
+      shell: pwsh
+      
+    - name: Stop IIS Site
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: |
+        Import-Module WebAdministration
+        Stop-Website -Name "pwdgen"
+        Write-Host "Stopped website: pwdgen"
+      shell: pwsh
+      
+    - name: Clear deployment folder
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: |
+        $deployPath = "F:\Sites\pwdgen"
+        if (Test-Path $deployPath) {
+          Remove-Item -Path "$deployPath\*" -Recurse -Force
+          Write-Host "Cleared deployment folder: $deployPath"
+        }
+      shell: pwsh
+      
+    - name: Publish to deployment folder
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: dotnet publish src/Server/PasswordGeneratorSite.csproj --no-build --configuration Release --output "F:\Sites\pwdgen"
+      
+    - name: Start IIS Application Pool
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: |
+        Import-Module WebAdministration
+        Start-WebAppPool -Name "pwdgen"
+        Write-Host "Started application pool: pwdgen"
+      shell: pwsh
+      
+    - name: Start IIS Site
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: |
+        Import-Module WebAdministration
+        Start-Website -Name "pwdgen"
+        Write-Host "Started website: pwdgen"
+      shell: pwsh
+      
+    - name: Verify deployment
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: |
+        $deployPath = "F:\Sites\pwdgen"
+        $files = Get-ChildItem -Path $deployPath -Recurse | Measure-Object
+        Write-Host "Deployment completed. Total files deployed: $($files.Count)"
+      shell: pwsh
