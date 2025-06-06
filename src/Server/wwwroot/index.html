@@ -29,6 +29,7 @@
       includeSimilar: false,
       includeUnambiguous: true,
       excludeSimilar: true,
+      characterProfile: 'conservative',
     };
 
     function generatePassword(length, options) {
@@ -40,17 +41,38 @@
         includeSimilar = false,
         includeUnambiguous = true,
         excludeSimilar = true,
+        characterProfile = 'conservative',
         plength = 12
       } = options;
 
-      const characters = {
-        lowercase: 'abcdefghijklmnopqrstuvwxyz',
-        uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-        numeric: '0123456789',
-        special: '!@#$%^&*()-_+=[]{}|:<>,.?/~`',
-        similar: 'iIlL1',
-        unambiguous: 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789',
+      const characterProfiles = {
+        conservative: {
+          lowercase: 'abcdefghijklmnopqrstuvwxyz',
+          uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+          numeric: '0123456789',
+          special: '!@$*()_-',
+          similar: 'iIlL1',
+          unambiguous: 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789',
+        },
+        standard: {
+          lowercase: 'abcdefghijklmnopqrstuvwxyz',
+          uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+          numeric: '0123456789',
+          special: '!@$*()_-[]{},.?',
+          similar: 'iIlL1',
+          unambiguous: 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789',
+        },
+        full: {
+          lowercase: 'abcdefghijklmnopqrstuvwxyz',
+          uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+          numeric: '0123456789',
+          special: '!@$^*()_-[]{}|<>,.?/~`',
+          similar: 'iIlL1',
+          unambiguous: 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789',
+        }
       };
+
+      const characters = characterProfiles[characterProfile] || characterProfiles.conservative;
 
       let validCharacters = [
         ...(includeLowercase ? characters.lowercase : ''),
@@ -180,6 +202,7 @@
           includeSimilar: form.elements.includeSimilar.checked,
           includeUnambiguous: form.elements.includeUnambiguous.checked,
           excludeSimilar: form.elements.excludeSimilar.checked,
+          characterProfile: form.elements.characterProfile.value,
         };
 
         const password = generatePassword(length, options);
@@ -317,6 +340,14 @@
           <div class="form-group">
             <label for="plength">Length:</label>
             <input type="number" id="plength" name="plength" value="12" min="1" max="100" required class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="characterProfile">Character Set:</label>
+            <select id="characterProfile" name="characterProfile" class="form-control">
+              <option value="conservative">Conservative (safe for most websites)</option>
+              <option value="standard">Standard (includes brackets and punctuation)</option>
+              <option value="full">Full (all special characters)</option>
+            </select>
           </div>
           <div class="form-group form-check">
             <input type="checkbox" name="includeLowercase" checked class="form-check-input">
