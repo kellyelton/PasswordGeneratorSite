@@ -14,6 +14,37 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Generate version
+      id: version
+      run: |
+        $now = Get-Date
+        $year = $now.ToString("yy")
+        $month = $now.ToString("MM")
+        $day = $now.ToString("dd")
+        $secondOfDay = [int]($now - $now.Date).TotalSeconds
+        $version = "$year.$month.$day.$secondOfDay"
+        Write-Host "Generated version: $version"
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+        
+        # Create version.json file
+        $versionJson = @{
+          version = $version
+          buildDate = $now.ToString("yyyy-MM-dd HH:mm:ss UTC")
+          commit = "${{ github.sha }}"
+        } | ConvertTo-Json
+        
+        $versionPath = "src/Server/wwwroot/version.json"
+        $versionJson | Out-File -FilePath $versionPath -Encoding UTF8
+        Write-Host "Created version.json at $versionPath"
+        
+        # Update service worker with version
+        $swPath = "src/Server/wwwroot/sw.js"
+        $swContent = Get-Content -Path $swPath -Raw
+        $swContent = $swContent -replace "const CACHE_VERSION = '[^']*';", "const CACHE_VERSION = 'pwd-guru-v$version';"
+        $swContent | Out-File -FilePath $swPath -Encoding UTF8 -NoNewline
+        Write-Host "Updated service worker with version $version"
+      shell: pwsh
+      
     # - name: Setup .NET
     #   uses: actions/setup-dotnet@v4
     #   with:
@@ -109,4 +140,15 @@ jobs:
         $deployPath = "F:\Sites\pwdgen"
         $files = Get-ChildItem -Path $deployPath -Recurse | Measure-Object
         Write-Host "Deployment completed. Total files deployed: $($files.Count)"
+      shell: pwsh
+      
+    - name: Tag repository with version
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: |
+        $version = "${{ steps.version.outputs.VERSION }}"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git tag -a "v$version" -m "Release version $version"
+        git push origin "v$version"
+        Write-Host "Tagged repository with version v$version"
       shell: pwsh
