@@ -1720,10 +1720,46 @@ Full: All special characters including symbols that some sites may not accept.</
         navigator.serviceWorker.register('/sw.js')
           .then(registration => {
             console.log('SW registered: ', registration);
+            
+            // Check for updates every 60 seconds
+            setInterval(() => {
+              registration.update();
+            }, 60000);
+            
+            // Listen for waiting service worker
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // New service worker is available, notify user
+                    console.log('New service worker available');
+                    
+                    // Automatically activate the new service worker
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                  }
+                });
+              }
+            });
           })
           .catch(registrationError => {
             console.log('SW registration failed: ', registrationError);
           });
+          
+        // Listen for service worker updates
+        navigator.serviceWorker.addEventListener('message', event => {
+          if (event.data && event.data.type === 'SW_UPDATED') {
+            console.log('Service worker updated:', event.data.message);
+            // Could show a notification to user here if desired
+          }
+        });
+        
+        // Handle controller change (new service worker activated)
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          console.log('New service worker has taken control');
+          // Optionally reload the page to get the latest content
+          // window.location.reload();
+        });
       });
     }
   </script>
