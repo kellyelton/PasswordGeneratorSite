@@ -1246,12 +1246,22 @@
       font-weight: bold;
       line-height: 1;
       text-align: center;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      width: 20px;
+      height: 16px;
+      gap: 1px;
     }
 
     .grid-char {
-      display: inline-block;
-      width: 8px;
-      margin: 0 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .character-grid br {
+      display: none;
     }
 
     /* Animation keyframes */
