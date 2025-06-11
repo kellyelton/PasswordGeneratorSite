@@ -400,9 +400,8 @@
 
       const passwordInput = document.getElementById('password');
 
-      form.addEventListener('submit', event => {
-        event.preventDefault();
-
+      // Function to generate password and save options from current form state
+      function generateAndSavePassword() {
         const length = Number(form.elements.plength.value);
         let options = {
           plength: form.elements.plength.value,
@@ -418,6 +417,11 @@
         const password = generatePassword(length, options);
         displayPassword(password, options.colorCoded);
         save_options(options);
+      }
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        generateAndSavePassword();
       });
 
       form.addEventListener('reset', event => {
@@ -442,14 +446,19 @@
         toggleAnimations();
       });
 
-      // Add event listener for colorCoded checkbox to re-render password
+      // Add event listener for colorCoded checkbox to regenerate password
       form.elements.colorCoded.addEventListener('change', event => {
-        const passwordElement = document.getElementById('password');
-        const currentPassword = passwordElement.dataset.password || passwordElement.textContent;
-        if (currentPassword) {
-          displayPassword(currentPassword, event.target.checked);
-        }
+        generateAndSavePassword();
       });
+
+      // Add event listeners for all form inputs to regenerate password on change
+      form.elements.plength.addEventListener('input', generateAndSavePassword);
+      form.elements.characterProfile.addEventListener('change', generateAndSavePassword);
+      form.elements.includeLowercase.addEventListener('change', generateAndSavePassword);
+      form.elements.includeUppercase.addEventListener('change', generateAndSavePassword);
+      form.elements.includeNumeric.addEventListener('change', generateAndSavePassword);
+      form.elements.includeSpecial.addEventListener('change', generateAndSavePassword);
+      form.elements.includeAmbiguous.addEventListener('change', generateAndSavePassword);
 
       // Generate a password
       form.dispatchEvent(new Event('submit', { cancelable: true }));
