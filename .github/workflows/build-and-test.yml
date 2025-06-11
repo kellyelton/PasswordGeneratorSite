@@ -32,43 +32,15 @@ jobs:
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: |
         $deployPath = "F:\Sites\pwdgen"
-        # Create simple app_offline.htm content
-        $appOfflineContent = "<!DOCTYPE html><html><head><title>Site Updating | Password Generator</title><meta http-equiv='refresh' content='10'></head><body><h1>Site is being updated...</h1><p>Please wait while we deploy the latest version.</p></body></html>"
+        $appOfflineSource = "src\Server\wwwroot\app_offline.htm"
         
-        # Create app_offline.htm to put site in maintenance mode
-        # This releases file locks and shows maintenance page
-        $appOfflineContent | Out-File -FilePath "$deployPath\app_offline.htm" -Encoding UTF8
-        Write-Host "Created app_offline.htm - site is now in maintenance mode"
+        # Copy app_offline.htm to deployment folder to put site in maintenance mode
+        # This releases file locks and shows styled maintenance page
+        Copy-Item -Path $appOfflineSource -Destination "$deployPath\app_offline.htm" -Force
+        Write-Host "Copied app_offline.htm - site is now in maintenance mode"
         
         # Wait a moment for IIS to detect the file and release locks
         Start-Sleep -Seconds 5
-      shell: pwsh
-      
-    - name: Backup critical files
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-      run: |
-        $deployPath = "F:\Sites\pwdgen"
-        $backupPath = "F:\Sites\pwdgen_backup"
-        
-        # Create backup directory
-        if (-not (Test-Path $backupPath)) {
-          New-Item -ItemType Directory -Path $backupPath -Force
-        }
-        
-        # Backup critical files that need to be preserved/updated
-        $criticalFiles = @("web.config", "404.html", "503.html")
-        
-        foreach ($file in $criticalFiles) {
-          $sourcePath = "$deployPath\$file"
-          $backupFilePath = "$backupPath\$file"
-          
-          if (Test-Path $sourcePath) {
-            Copy-Item -Path $sourcePath -Destination $backupFilePath -Force
-            Write-Host "Backed up: $file"
-          } else {
-            Write-Host "File not found for backup: $file"
-          }
-        }
       shell: pwsh
       
     - name: Clear deployment folder (preserve app_offline.htm)
@@ -112,41 +84,6 @@ jobs:
     - name: Publish to deployment folder
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: dotnet publish src/Server/PasswordGeneratorSite.csproj --no-build --configuration Release --output "F:\Sites\pwdgen"
-      
-    - name: Restore critical files
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-      run: |
-        $deployPath = "F:\Sites\pwdgen"
-        $backupPath = "F:\Sites\pwdgen_backup"
-        
-        # Restore critical files (overwrite with backed up versions or new versions from publish)
-        $criticalFiles = @("web.config", "404.html", "503.html")
-        
-        foreach ($file in $criticalFiles) {
-          $backupFilePath = "$backupPath\$file"
-          $deployFilePath = "$deployPath\$file"
-          
-          # If we have a backup, restore it (this ensures our custom error pages are present)
-          if (Test-Path $backupFilePath) {
-            Copy-Item -Path $backupFilePath -Destination $deployFilePath -Force
-            Write-Host "Restored from backup: $file"
-          }
-          # If the published version exists and we don't have a backup, keep the published version
-          elseif (Test-Path $deployFilePath) {
-            Write-Host "Using published version: $file"
-          }
-          # If neither exists, we have a problem
-          else {
-            Write-Warning "Critical file missing: $file"
-          }
-        }
-        
-        # Clean up backup directory
-        if (Test-Path $backupPath) {
-          Remove-Item -Path $backupPath -Recurse -Force
-          Write-Host "Cleaned up backup directory"
-        }
-      shell: pwsh
       
     - name: Disable maintenance mode
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
