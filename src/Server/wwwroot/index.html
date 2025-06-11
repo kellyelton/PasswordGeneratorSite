@@ -1169,12 +1169,11 @@
       display: flex;
       align-items: center;
       margin-bottom: 10px;
-    }
-
-    .logo-section {
+    }    .logo-section {
       display: flex;
       flex-direction: column;
       align-items: center;
+      margin-top: 10px;
     }
 
     .title-section {
@@ -1196,9 +1195,7 @@
       .logo-section {
         align-items: center;
       }
-    }
-
-    /* Desktop styles - left align (default behavior already in place) */
+    }    /* Desktop styles - left align (default behavior already in place) */
     @media (min-width: 769px) {
       .header-container {
         flex-direction: row;
@@ -1211,7 +1208,12 @@
       }
 
       .logo-section {
-        align-items: center;
+        align-items: flex-start;
+      }
+
+      .logo-section i {
+        margin-left: 8px;
+        text-align: left;
       }
     }
   </style>
@@ -1225,9 +1227,7 @@
       </div>
       <div class="title-section">
         <h1 style="margin-bottom: 0; margin-top: 0;"><span id="host" style="color: var(--host-color)"></span></h1>
-      </div>
-    </div>
-    <br />
+      </div>    </div>
     <br />
     <div>
       <div class="container">
