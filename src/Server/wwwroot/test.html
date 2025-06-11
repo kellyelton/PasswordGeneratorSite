@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Alignment Test - Before and After</title>
+  <style>
+    body { font-family: 'Roboto', sans-serif; padding: 20px; }
+    
+    .test-section { 
+      border: 2px solid #ccc; 
+      margin: 20px 0; 
+      padding: 20px; 
+      background: #f9f9f9; 
+    }
+
+    .form-group { margin-bottom: 1rem; }
+
+    .form-check {
+      position: relative;
+      display: block;
+      padding-left: 1.25rem;
+      margin: 10px 0;
+    }
+
+    .form-check-input {
+      position: absolute;
+      margin-top: .3rem;
+      margin-left: -1.25rem;
+    }
+
+    .form-check-label {
+      margin-bottom: 0;
+    }
+
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      margin-left: 5px;
+      cursor: help;
+      vertical-align: middle;
+    }
+
+    /* BEFORE: Original problematic styling */
+    .tooltip-icon-before {
+      width: 16px;
+      height: 16px;
+      background-color: #dc3545;
+      border-radius: 50%;
+      color: white;
+      text-align: center;
+      line-height: 16px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    /* AFTER: Fixed styling */
+    .tooltip-icon-after {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background-color: #007bff;
+      border-radius: 50%;
+      color: white;
+      text-align: center;
+      line-height: 16px;
+      font-size: 12px;
+      font-weight: bold;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <h1>Question Icon Alignment Test</h1>
+  
+  <div class="test-section">
+    <h2>BEFORE: Original issue (red icons)</h2>
+    <p>These icons should appear below the text baseline, demonstrating the problem:</p>
+    
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input">
+      <label class="form-check-label">Lowercase letters
+        <span class="tooltip">
+          <div class="tooltip-icon-before">?</div>
+        </span>
+      </label>
+    </div>
+
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input">
+      <label class="form-check-label">Uppercase letters
+        <span class="tooltip">
+          <div class="tooltip-icon-before">?</div>
+        </span>
+      </label>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>AFTER: Fixed alignment (blue icons)</h2>
+    <p>These icons should be vertically centered with the text:</p>
+    
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input">
+      <label class="form-check-label">Lowercase letters
+        <span class="tooltip">
+          <div class="tooltip-icon-after">?</div>
+        </span>
+      </label>
+    </div>
+
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input">
+      <label class="form-check-label">Uppercase letters
+        <span class="tooltip">
+          <div class="tooltip-icon-after">?</div>
+        </span>
+      </label>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Reference: Normal text alignment</h2>
+    <p>Normal text with inline elements: This is text <span style="display: inline-block; width: 16px; height: 16px; background: green; vertical-align: middle;"></span> middle aligned and <span style="display: inline-block; width: 16px; height: 16px; background: red; vertical-align: baseline;"></span> baseline aligned.</p>
+  </div>
+
+  <div class="test-section">
+    <h2>Actual Application Result</h2>
+    <p>View the actual application at: <a href="/">Main application</a></p>
+  </div>
+</body>
+</html>
