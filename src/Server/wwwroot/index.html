@@ -5,6 +5,8 @@
   <meta content='width=device-width, initial-scale=1' name='viewport' />
   <meta name="description" content="Secure password generator">
   <meta name="keywords" content="password, generator, security, strong passwords, password strength">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
   <script>
     window.onload = function () {
       var hostname = window.location.hostname.split('.').slice(-2).join('.');
@@ -1067,9 +1069,14 @@
 
 <body style="padding: 0px; margin:0px; background-color: var(--bg-body);">
   <div id="main" style="padding: 1px 20px 20px 20px; background-color: var(--bg-color)">
-    <h1 style="margin-bottom: 6px;"><span id="host" style="color: var(--host-color)"></span> &nbsp;<i
-        style="color: var(--text-color); font-size: smaller">password generator</i></h1>
-    <i style="color: var(--subtitle-color)">&nbsp;&nbsp;No Ads, No Third Party Trackers, No BS</i>
+    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+      <img src="/logo.png" alt="Password Generator Logo" style="height: 48px; width: 48px; margin-right: 12px; border-radius: 8px;">
+      <div>
+        <h1 style="margin-bottom: 6px; margin-top: 0;"><span id="host" style="color: var(--host-color)"></span> &nbsp;<i
+            style="color: var(--text-color); font-size: smaller">password generator</i></h1>
+        <i style="color: var(--subtitle-color)">&nbsp;&nbsp;No Ads, No Third Party Trackers, No BS</i>
+      </div>
+    </div>
     <br />
     <br />
     <div>
