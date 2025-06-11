@@ -229,6 +229,9 @@
       };
       
       save_options(resetOptions);
+      
+      // Update length display after reset
+      document.getElementById('plength-display').textContent = default_options.plength;
     }
     function copyPassword() {
       const passwordElement = document.getElementById('password');
@@ -474,6 +477,13 @@
             }
           }
         }
+        // Update length display after loading options
+        if (options.plength) {
+          document.getElementById('plength-display').textContent = options.plength;
+        }
+      } else {
+        // Initialize display with default value
+        document.getElementById('plength-display').textContent = form.elements.plength.value;
       }
 
       const passwordInput = document.getElementById('password');
@@ -548,9 +558,16 @@
         currentOptions.colorCoded = event.target.checked;
         save_options(currentOptions);
       });
-
       // Add event listeners for all form inputs to regenerate password on change
-      form.elements.plength.addEventListener('input', generateAndSavePassword);
+      form.elements.plength.addEventListener('input', function() {
+        // Update the length display immediately as user drags
+        document.getElementById('plength-display').textContent = this.value;
+      });
+      
+      form.elements.plength.addEventListener('change', function() {
+        // Generate password only when user finishes dragging
+        generateAndSavePassword();
+      });
       form.elements.characterProfile.addEventListener('change', generateAndSavePassword);
       form.elements.includeLowercase.addEventListener('change', generateAndSavePassword);
       form.elements.includeUppercase.addEventListener('change', generateAndSavePassword);
@@ -635,6 +652,7 @@
       --theme-btn-color: #e0e0e0;
       --theme-btn-border: #404040;
       --theme-btn-hover-bg: #404040;
+      --slider-track-color: #1f1f1f;
     }
 
     /* Use system preference when no explicit theme is set */
@@ -660,12 +678,13 @@
         --footer-border: #4d94ff;
         --footer-support-bg: #2a2a2a;
         --footer-support-border: #dc3545;
-        --host-color: #4d94ff;
+        --host-color: #4d94ff;        
         --subtitle-color: #9ca3af;
         --theme-btn-bg: #2a2a2a;
         --theme-btn-color: #e0e0e0;
         --theme-btn-border: #404040;
         --theme-btn-hover-bg: #404040;
+        --slider-track-color: #1f1f1f;
       }
     }
 
@@ -691,6 +710,111 @@
       border-color: var(--focus-border-color);
       outline: 0;
       box-shadow: 0 0 0 .2rem var(--focus-shadow);
+    }
+
+    /* Add slider track color variables */
+    :root {
+      --slider-track-color: #dee2e6;
+    }
+
+    [data-theme="dark"] {
+      --slider-track-color: #1f1f1f;
+    }
+
+    /* Range slider styling - Custom approach for better cross-browser support */
+    .form-control-range {
+      width: 100%;
+      height: 2rem;
+      padding: 0;
+      -webkit-appearance: none;
+      appearance: none;
+      outline: none;
+      position: relative;
+      background: linear-gradient(to right, var(--slider-track-color) 0%, var(--slider-track-color) 100%) no-repeat center !important;
+      background-size: 100% 0.3rem !important;
+    }
+    
+    /* Dark theme track */
+    [data-theme="dark"] .form-control-range {
+      background: linear-gradient(to right, #1f1f1f 0%, #1f1f1f 100%) no-repeat center !important;
+      background-size: 100% 0.3rem !important;
+    }
+
+    /* Remove default track styling */
+    .form-control-range::-webkit-slider-track {
+      background: transparent;
+      border: none;
+      height: 0.3rem;
+      cursor: pointer;
+    }
+
+    .form-control-range::-moz-range-track {
+      background: transparent;
+      border: none;
+      height: 0.3rem;
+      cursor: pointer;
+    }
+
+    /* Style the thumb */
+    .form-control-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 1.5rem;
+      width: 1.5rem;
+      border-radius: 50%;
+      background: var(--btn-primary-bg);
+      cursor: pointer;
+      border: 3px solid var(--bg-color);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      transition: all 0.15s ease-in-out;
+    }
+
+    .form-control-range::-moz-range-thumb {
+      height: 1.5rem;
+      width: 1.5rem;
+      border-radius: 50%;
+      background: var(--btn-primary-bg);
+      cursor: pointer;
+      border: 3px solid var(--bg-color);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      transition: all 0.15s ease-in-out;
+    }
+
+    /* Hover effects */
+    .form-control-range::-webkit-slider-thumb:hover {
+      background: var(--btn-primary-hover-bg);
+      transform: scale(1.1);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .form-control-range::-moz-range-thumb:hover {
+      background: var(--btn-primary-hover-bg);
+      transform: scale(1.1);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Focus effects */
+    .form-control-range:focus::-webkit-slider-thumb {
+      box-shadow: 0 0 0 0.3rem var(--focus-shadow);
+    }
+
+    .form-control-range:focus::-moz-range-thumb {
+      box-shadow: 0 0 0 0.3rem var(--focus-shadow);
+    }
+
+    .form-control-range:focus {
+      outline: none;
+    }
+
+    /* Length display styling */
+    .length-display {
+      font-weight: 600;
+      color: var(--btn-primary-bg);
+      background: var(--focus-shadow);
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.9rem;
+      margin-left: 0.5rem;
     }
 
     .form-group {
@@ -1249,15 +1373,15 @@
     <br />
     <div>
       <div class="container">
-        <form id="generate-password-form" class="form">
+        <form id="generate-password-form" class="form">          
           <div class="form-group">
-            <label for="plength">Length:
+            <label for="plength">Length: <span id="plength-display" class="length-display">12</span>
               <span class="tooltip">
                 <div class="tooltip-icon">?</div>
                 <span class="tooltiptext">The number of characters in the generated password. Longer passwords are more secure.</span>
               </span>
             </label>
-            <input type="number" id="plength" name="plength" value="12" min="1" max="100" required class="form-control">
+            <input type="range" id="plength" name="plength" value="12" min="1" max="128" required class="form-control-range">
           </div>
           <div class="form-group">
             <label for="characterProfile">Character Set:
