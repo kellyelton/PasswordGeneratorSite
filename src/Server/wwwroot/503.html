@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Site Updating | Password Generator</title>
+  <meta content='width=device-width, initial-scale=1' name='viewport' />
+  <meta name="description" content="Site is temporarily updating">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <script>
+    // Theme management functions
+    function getThemePreference() {
+      const saved = localStorage.getItem('theme');
+      if (saved) {
+        return saved;
+      }
+      return 'system';
+    }
+
+    function setThemePreference(theme) {
+      localStorage.setItem('theme', theme);
+    }
+
+    function applyTheme(theme) {
+      const html = document.documentElement;
+      
+      if (theme === 'system') {
+        html.removeAttribute('data-theme');
+      } else {
+        html.setAttribute('data-theme', theme);
+      }
+      
+      updateThemeIcon(theme);
+    }
+
+    function updateThemeIcon(theme) {
+      const systemIcon = document.getElementById('system-icon');
+      const lightIcon = document.getElementById('light-icon');
+      const darkIcon = document.getElementById('dark-icon');
+      
+      if (!systemIcon || !lightIcon || !darkIcon) return;
+      
+      // Hide all icons
+      systemIcon.style.display = 'none';
+      lightIcon.style.display = 'none';
+      darkIcon.style.display = 'none';
+      
+      // Show the appropriate icon
+      if (theme === 'system') {
+        systemIcon.style.display = 'block';
+      } else if (theme === 'light') {
+        lightIcon.style.display = 'block';
+      } else if (theme === 'dark') {
+        darkIcon.style.display = 'block';
+      }
+    }
+
+    function toggleTheme() {
+      const currentTheme = getThemePreference();
+      let nextTheme;
+      
+      if (currentTheme === 'system') {
+        nextTheme = 'light';
+      } else if (currentTheme === 'light') {
+        nextTheme = 'dark';
+      } else {
+        nextTheme = 'system';
+      }
+      
+      setThemePreference(nextTheme);
+      applyTheme(nextTheme);
+    }
+
+    window.onload = function () {
+      // Initialize theme
+      const savedTheme = getThemePreference();
+      applyTheme(savedTheme);
+      
+      var hostname = window.location.hostname.split('.').slice(-2).join('.');
+      var hostnameparts = hostname.split('.');
+
+      if (hostnameparts.length == 1) {
+        hostname = hostnameparts[0].toLowerCase();
+      } else if (hostnameparts.length == 2) {
+        hostname = hostnameparts[0].toLowerCase() + "." + hostnameparts[1].toUpperCase();
+      }
+
+      document.getElementById("host").innerHTML = hostname;
+      
+      // Auto-refresh every 10 seconds to check if site is back up
+      setTimeout(function() {
+        window.location.reload();
+      }, 10000);
+    };
+  </script>
+
+  <style>
+    :root {
+      /* Light theme variables */
+      --bg-color: #ffffff;
+      --bg-body: #171026;
+      --text-color: #495057;
+      --border-color: #ced4da;
+      --focus-border-color: #80bdff;
+      --focus-shadow: rgba(0, 123, 255, .25);
+      --btn-primary-bg: #007bff;
+      --btn-primary-border: #007bff;
+      --btn-primary-hover-bg: #0069d9;
+      --btn-primary-hover-border: #0062cc;
+      --subtitle-color: #6c757d;
+      --footer-border: #373044;
+      --theme-btn-bg: rgba(255, 255, 255, 0.1);
+      --theme-btn-hover-bg: rgba(255, 255, 255, 0.2);
+      --host-color: #007bff;
+    }
+
+    [data-theme="light"] {
+      --bg-color: #ffffff;
+      --bg-body: #ffffff;
+      --text-color: #495057;
+      --border-color: #ced4da;
+      --focus-border-color: #80bdff;
+      --focus-shadow: rgba(0, 123, 255, .25);
+      --btn-primary-bg: #007bff;
+      --btn-primary-border: #007bff;
+      --btn-primary-hover-bg: #0069d9;
+      --btn-primary-hover-border: #0062cc;
+      --subtitle-color: #6c757d;
+      --footer-border: #dee2e6;
+      --theme-btn-bg: rgba(0, 0, 0, 0.1);
+      --theme-btn-hover-bg: rgba(0, 0, 0, 0.2);
+      --host-color: #007bff;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #1a1a1a;
+      --bg-body: #171026;
+      --text-color: #e9ecef;
+      --border-color: #495057;
+      --focus-border-color: #80bdff;
+      --focus-shadow: rgba(0, 123, 255, .25);
+      --btn-primary-bg: #0d6efd;
+      --btn-primary-border: #0d6efd;
+      --btn-primary-hover-bg: #0b5ed7;
+      --btn-primary-hover-border: #0a58ca;
+      --subtitle-color: #adb5bd;
+      --footer-border: #373044;
+      --theme-btn-bg: rgba(255, 255, 255, 0.1);
+      --theme-btn-hover-bg: rgba(255, 255, 255, 0.2);
+      --host-color: #66b3ff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --bg-color: #1a1a1a;
+        --bg-body: #171026;
+        --text-color: #e9ecef;
+        --border-color: #495057;
+        --focus-border-color: #80bdff;
+        --focus-shadow: rgba(0, 123, 255, .25);
+        --btn-primary-bg: #0d6efd;
+        --btn-primary-border: #0d6efd;
+        --btn-primary-hover-bg: #0b5ed7;
+        --btn-primary-hover-border: #0a58ca;
+        --subtitle-color: #adb5bd;
+        --footer-border: #373044;
+        --theme-btn-bg: rgba(255, 255, 255, 0.1);
+        --theme-btn-hover-bg: rgba(255, 255, 255, 0.2);
+        --host-color: #66b3ff;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border: none;
+      border-radius: 50%;
+      background-color: var(--theme-btn-bg);
+      color: var(--text-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s ease;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+
+    .theme-btn:hover {
+      background-color: var(--theme-btn-hover-bg);
+    }
+
+    .theme-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      margin: 0;
+      text-decoration: none;
+      background-color: var(--btn-primary-bg);
+      color: white;
+      border: 1px solid var(--btn-primary-border);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background-color: var(--btn-primary-hover-bg);
+      border-color: var(--btn-primary-hover-border);
+      text-decoration: none;
+      color: white;
+    }
+
+    .btn-primary {
+      background-color: var(--btn-primary-bg);
+      border-color: var(--btn-primary-border);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--btn-primary-hover-bg);
+      border-color: var(--btn-primary-hover-border);
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .error-code {
+      font-size: 6rem;
+      font-weight: bold;
+      color: var(--host-color);
+      margin: 0;
+      line-height: 1;
+    }
+
+    .error-title {
+      font-size: 2rem;
+      margin: 20px 0;
+      color: var(--text-color);
+    }
+
+    .error-message {
+      font-size: 1.2rem;
+      margin: 20px 0;
+      color: var(--subtitle-color);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .home-link {
+      margin-top: 30px;
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      padding: 10px;
+      border-top: 1px solid var(--footer-border);
+      background-color: var(--bg-body);
+      font-size: 0.9rem;
+      color: var(--subtitle-color);
+    }
+
+    .refresh-info {
+      font-size: 1rem;
+      margin-top: 15px;
+      color: var(--subtitle-color);
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      .error-code {
+        font-size: 4rem;
+      }
+      
+      .error-title {
+        font-size: 1.5rem;
+      }
+      
+      .error-message {
+        font-size: 1rem;
+        padding: 0 20px;
+      }
+      
+      .theme-btn {
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+      }
+      
+      .theme-icon {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Theme toggle button -->
+  <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">
+    <!-- System theme icon -->
+    <svg id="system-icon" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+      <line x1="8" y1="21" x2="16" y2="21"></line>
+      <line x1="12" y1="17" x2="12" y2="21"></line>
+    </svg>
+    <!-- Light theme icon -->
+    <svg id="light-icon" class="theme-icon" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+    <!-- Dark theme icon -->
+    <svg id="dark-icon" class="theme-icon" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+    </svg>
+  </button>
+
+  <div class="container">
+    <h1 class="error-code">503</h1>
+    <h2 class="error-title">Site Updating</h2>
+    <p class="error-message">
+      The password generator is currently being updated with new features and improvements. 
+      Please wait a moment while we complete the update process.
+    </p>
+    <p class="refresh-info">
+      This page will automatically refresh in 10 seconds.
+    </p>
+    <div class="home-link">
+      <a href="javascript:window.location.reload()" class="btn btn-primary">Refresh Now</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Powered by <span id="host"></span></p>
+  </div>
+</body>
+
+</html>

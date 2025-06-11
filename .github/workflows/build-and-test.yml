@@ -28,43 +28,22 @@ jobs:
     - name: Test
       run: dotnet test src/Server/PasswordGeneratorSite.csproj --no-build --configuration Release --verbosity normal
       
-    - name: Stop IIS Application Pool
+    - name: Enable maintenance mode
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: |
-        Import-Module WebAdministration
-        try {
-          $appPool = Get-WebAppPoolState -Name "pwdgen"
-          if ($appPool.Value -eq "Started") {
-            Stop-WebAppPool -Name "pwdgen"
-            Write-Host "Stopped application pool: pwdgen"
-          } else {
-            Write-Host "Application pool 'pwdgen' is already stopped (state: $($appPool.Value))"
-          }
-        }
-        catch {
-          Write-Host "Could not check or stop application pool 'pwdgen': $($_.Exception.Message)"
-        }
+        $deployPath = "F:\Sites\pwdgen"
+        $appOfflineSource = "src\Server\wwwroot\app_offline.htm"
+        
+        # Copy app_offline.htm to deployment folder to put site in maintenance mode
+        # This releases file locks and shows styled maintenance page
+        Copy-Item -Path $appOfflineSource -Destination "$deployPath\app_offline.htm" -Force
+        Write-Host "Copied app_offline.htm - site is now in maintenance mode"
+        
+        # Wait a moment for IIS to detect the file and release locks
+        Start-Sleep -Seconds 5
       shell: pwsh
       
-    - name: Stop IIS Site
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-      run: |
-        Import-Module WebAdministration
-        try {
-          $website = Get-WebsiteState -Name "pwdgen"
-          if ($website.Value -eq "Started") {
-            Stop-Website -Name "pwdgen"
-            Write-Host "Stopped website: pwdgen"
-          } else {
-            Write-Host "Website 'pwdgen' is already stopped (state: $($website.Value))"
-          }
-        }
-        catch {
-          Write-Host "Could not check or stop website 'pwdgen': $($_.Exception.Message)"
-        }
-      shell: pwsh
-      
-    - name: Clear deployment folder
+    - name: Clear deployment folder (preserve app_offline.htm)
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: |
         $deployPath = "F:\Sites\pwdgen"
@@ -76,8 +55,13 @@ jobs:
           while ($attempt -le $maxAttempts -and -not $success) {
             try {
               Write-Host "Attempt $attempt of $maxAttempts to clear deployment folder..."
-              Remove-Item -Path "$deployPath\*" -Recurse -Force -ErrorAction Stop
-              Write-Host "Successfully cleared deployment folder: $deployPath"
+              
+              # Remove all files except app_offline.htm
+              Get-ChildItem -Path $deployPath -Recurse | Where-Object { 
+                $_.Name -ne "app_offline.htm" 
+              } | Remove-Item -Recurse -Force -ErrorAction Stop
+              
+              Write-Host "Successfully cleared deployment folder (preserved app_offline.htm)"
               $success = $true
             }
             catch {
@@ -101,20 +85,22 @@ jobs:
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: dotnet publish src/Server/PasswordGeneratorSite.csproj --no-build --configuration Release --output "F:\Sites\pwdgen"
       
-    - name: Start IIS Application Pool
+    - name: Disable maintenance mode
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: |
-        Import-Module WebAdministration
-        Start-WebAppPool -Name "pwdgen"
-        Write-Host "Started application pool: pwdgen"
-      shell: pwsh
-      
-    - name: Start IIS Site
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-      run: |
-        Import-Module WebAdministration
-        Start-Website -Name "pwdgen"
-        Write-Host "Started website: pwdgen"
+        $deployPath = "F:\Sites\pwdgen"
+        $appOfflinePath = "$deployPath\app_offline.htm"
+        
+        # Remove app_offline.htm to bring site back online
+        if (Test-Path $appOfflinePath) {
+          Remove-Item -Path $appOfflinePath -Force
+          Write-Host "Removed app_offline.htm - site is now back online"
+        } else {
+          Write-Host "app_offline.htm not found - site should already be online"
+        }
+        
+        # Wait a moment for IIS to detect the file removal
+        Start-Sleep -Seconds 2
       shell: pwsh
       
     - name: Verify deployment
