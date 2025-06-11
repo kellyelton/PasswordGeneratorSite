@@ -211,7 +211,7 @@
       
       save_options(resetOptions);
     }
-    function copyPassword(showNotification = false) {
+    function copyPassword() {
       const passwordElement = document.getElementById('password');
       const password = passwordElement.dataset.password || passwordElement.textContent;
       
@@ -222,10 +222,6 @@
       tempTextarea.select();
       document.execCommand('copy');
       document.body.removeChild(tempTextarea);
-      
-      if (showNotification) {
-        showToast('Copied!');
-      }
     }
 
     function adjustTooltipPosition() {
@@ -426,38 +422,7 @@
       updateAutoClipboardIcon(newEnabled);
     }
 
-    // Toast notification function
-    function showToast(message, duration = 3000) {
-      // Remove any existing toast
-      const existingToast = document.querySelector('.toast');
-      if (existingToast) {
-        existingToast.remove();
-      }
 
-      // Create new toast
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.textContent = message;
-      
-      // Add to document
-      document.body.appendChild(toast);
-      
-      // Trigger show animation
-      setTimeout(() => {
-        toast.classList.add('show');
-      }, 10);
-      
-      // Auto hide after duration
-      setTimeout(() => {
-        toast.classList.remove('show');
-        toast.classList.add('hide');
-        setTimeout(() => {
-          if (toast.parentNode) {
-            toast.parentNode.removeChild(toast);
-          }
-        }, 300);
-      }, duration);
-    }
   </script>
   <script>
     window.onload = function () {
@@ -514,7 +479,7 @@
         
         // Auto-copy to clipboard if enabled
         if (getAutoClipboardPreference()) {
-          copyPassword(true); // true = show notification
+          copyPassword();
         }
       }
 
@@ -530,7 +495,7 @@
 
       form.elements.copypassword.addEventListener('click', event => {
         event.preventDefault();
-        copyPassword(true); // Show notification for manual copy too
+        copyPassword();
       });
 
       // Add event listener for theme toggle button
@@ -1023,32 +988,7 @@
       height: 20px;
     }
 
-    /* Toast notification styles */
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background-color: var(--theme-btn-bg);
-      color: var(--text-color);
-      border: 1px solid var(--theme-btn-border);
-      border-radius: .25rem;
-      padding: 12px 16px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      z-index: 1000;
-      opacity: 0;
-      transform: translateX(100%);
-      transition: all 0.3s ease-in-out;
-    }
 
-    .toast.show {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .toast.hide {
-      opacity: 0;
-      transform: translateX(100%);
-    }
 
     /* Animation keyframes */
     @keyframes spin {
