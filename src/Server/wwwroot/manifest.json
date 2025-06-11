@@ -1,6 +1,6 @@
 {
-  "name": "pwd.guru - Password Generator",
-  "short_name": "pwd.guru",
+  "name": "pwd.GURU - Password Generator",
+  "short_name": "pwd.GURU",
   "description": "Secure password generator with no ads, no tracking, no BS",
   "start_url": "/",
   "display": "standalone",
