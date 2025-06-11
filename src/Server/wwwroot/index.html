@@ -196,6 +196,20 @@
           }
         }
       }
+      
+      // Immediately save the reset options so the change is persisted
+      const resetOptions = {
+        plength: default_options.plength,
+        includeLowercase: default_options.includeLowercase,
+        includeUppercase: default_options.includeUppercase,
+        includeNumeric: default_options.includeNumeric,
+        includeSpecial: default_options.includeSpecial,
+        includeAmbiguous: default_options.includeAmbiguous,
+        characterProfile: default_options.characterProfile,
+        colorCoded: default_options.colorCoded,
+      };
+      
+      save_options(resetOptions);
     }
     function copyPassword() {
       const passwordElement = document.getElementById('password');
