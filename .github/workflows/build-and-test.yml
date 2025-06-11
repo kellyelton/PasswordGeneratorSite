@@ -39,15 +39,6 @@ jobs:
     - name: Test
       run: dotnet test src/Server/PasswordGeneratorSite.csproj --no-build --configuration Release --verbosity normal
       
-    - name: Deploy to production (auto-triggered)
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-      run: |
-        Write-Host "🚀 Starting automatic deployment to production..."
-        Write-Host "Triggered by: ${{ github.event_name }} on ${{ github.ref }}"
-        Write-Host "Commit: ${{ github.sha }}"
-        Write-Host "Actor: ${{ github.actor }}"
-      shell: pwsh
-      
     - name: Enable maintenance mode
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: |
@@ -128,9 +119,7 @@ jobs:
       run: |
         $deployPath = "F:\Sites\pwdgen"
         $files = Get-ChildItem -Path $deployPath -Recurse | Measure-Object
-        Write-Host "✅ Automatic deployment completed successfully!"
+        Write-Host "✅ Deployment completed successfully!"
         Write-Host "📁 Total files deployed: $($files.Count)"
         Write-Host "📍 Deployment path: $deployPath"
-        Write-Host "🎯 Commit: ${{ github.sha }}"
-        Write-Host "🤖 No admin approval was required - deployment ran automatically on merge!"
       shell: pwsh
