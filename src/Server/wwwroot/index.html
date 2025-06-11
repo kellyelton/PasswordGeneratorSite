@@ -1159,22 +1159,71 @@
 
       [data-animations="enabled"] .theme-transition .theme-background-slide::before {
         animation: none;
+      }      [data-animations="enabled"] .theme-transition * {
+        animation: none;
+      }
+    }
+
+    /* Responsive header styles */
+    .header-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .logo-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .title-section {
+      margin-left: 16px;
+    }
+
+    /* Mobile styles - center everything */
+    @media (max-width: 768px) {
+      .header-container {
+        flex-direction: column;
+        text-align: center;
       }
 
-      [data-animations="enabled"] .theme-transition * {
-        animation: none;
+      .title-section {
+        margin-left: 0;
+        margin-top: 16px;
+      }
+
+      .logo-section {
+        align-items: center;
+      }
+    }
+
+    /* Desktop styles - left align (default behavior already in place) */
+    @media (min-width: 769px) {
+      .header-container {
+        flex-direction: row;
+        text-align: left;
+      }
+
+      .title-section {
+        margin-left: 16px;
+        margin-top: 0;
+      }
+
+      .logo-section {
+        align-items: center;
       }
     }
   </style>
 </head>
 
 <body style="padding: 0px; margin:0px; background-color: var(--bg-body);">
-  <div id="main" style="padding: 1px 20px 20px 20px; background-color: var(--bg-color)">    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-      <div style="display: flex; flex-direction: column; align-items: center;">
+  <div id="main" style="padding: 1px 20px 20px 20px; background-color: var(--bg-color)">    <div class="header-container">
+      <div class="logo-section">
         <img src="/logo.png" alt="pwd.guru Logo" style="height: 48px; width: auto; margin-bottom: 8px; border-radius: 8px;">
         <i style="color: var(--subtitle-color); font-size: smaller; text-align: center;">No Ads, No Third Party Trackers, No BS</i>
       </div>
-      <div style="margin-left: 16px;">
+      <div class="title-section">
         <h1 style="margin-bottom: 0; margin-top: 0;"><span id="host" style="color: var(--host-color)"></span></h1>
       </div>
     </div>
