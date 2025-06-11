@@ -273,8 +273,16 @@
       // Add theme transition animation if animations are enabled
       if (isAnimationEnabled) {
         html.classList.add('theme-transition');
+        const mainDiv = document.getElementById('main');
+        if (mainDiv) {
+          mainDiv.classList.add('theme-background-slide');
+        }
+        
         setTimeout(() => {
           html.classList.remove('theme-transition');
+          if (mainDiv) {
+            mainDiv.classList.remove('theme-background-slide');
+          }
         }, 300);
       }
       
@@ -920,21 +928,71 @@
       }
     }
 
-    /* Animation classes - only applied when data-animations="enabled" */
+    @keyframes themeSlideDown {
+      0% {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes colorFade {
+      0% {
+        opacity: 0.7;
+      }
+      50% {
+        opacity: 0.4;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    /* Initial states for animated elements when animations are enabled */
+    [data-animations="enabled"] .form-group {
+      opacity: 0;
+      transform: translateX(-20px);
+      animation: slideIn 0.5s ease-out forwards;
+    }
+
     [data-animations="enabled"] .page-load-animation {
-      animation: fadeInUp 0.8s ease-out;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 0.8s ease-out forwards;
     }
 
     [data-animations="enabled"] .theme-transition {
-      transition: all 0.3s ease-in-out;
+      transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+    }
+
+    /* Enhanced theme transition with background slide effect */
+    [data-animations="enabled"] .theme-transition .theme-background-slide {
+      position: relative;
+      overflow: hidden;
+    }
+
+    [data-animations="enabled"] .theme-transition .theme-background-slide::before {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--bg-color);
+      animation: themeSlideDown 0.3s ease-in-out forwards;
+      z-index: -1;
+    }
+
+    /* Color fade effect for theme transitions */
+    [data-animations="enabled"] .theme-transition * {
+      animation: colorFade 0.3s ease-in-out;
     }
 
     [data-animations="enabled"] .password-generate-animation {
       animation: pulse 0.6s ease-in-out;
-    }
-
-    [data-animations="enabled"] .form-group {
-      animation: slideIn 0.5s ease-out;
     }
 
     [data-animations="enabled"] .form-group:nth-child(1) { animation-delay: 0.1s; }
@@ -958,6 +1016,16 @@
       [data-animations="enabled"] .form-group {
         animation: none;
         transition: none;
+        opacity: 1;
+        transform: none;
+      }
+
+      [data-animations="enabled"] .theme-transition .theme-background-slide::before {
+        animation: none;
+      }
+
+      [data-animations="enabled"] .theme-transition * {
+        animation: none;
       }
     }
   </style>
