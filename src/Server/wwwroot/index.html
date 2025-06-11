@@ -7,6 +7,23 @@
   <meta name="keywords" content="password, generator, security, strong passwords, password strength">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  
+  <!-- PWA Manifest and Meta Tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#007bff">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="pwd.guru">
+  
+  <!-- Apple Touch Icons for iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="pwd.guru">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png">
+  
+  <!-- Microsoft Tiles -->
+  <meta name="msapplication-TileImage" content="/icon-192.png">
+  <meta name="msapplication-TileColor" content="#007bff">
   <script>
     window.onload = function () {
       var hostname = window.location.hostname.split('.').slice(-2).join('.');
@@ -1404,6 +1421,21 @@ Full: All special characters including symbols that some sites may not accept.</
       <p>Thank you so much for using this site and all of your support! My family and I appreciate it greatly!</p>
     </div>
   </div>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('SW registered: ', registration);
+          })
+          .catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+  </script>
 </body>
 
 </html>
