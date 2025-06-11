@@ -124,6 +124,22 @@
 
       document.getElementById("host").innerHTML = hostname;
       
+      // Load and display version
+      fetch('/version.json')
+        .then(response => response.ok ? response.json() : Promise.reject('Version info not available'))
+        .then(data => {
+          const versionText = document.getElementById('version-text');
+          if (versionText) {
+            versionText.textContent = `Version ${data.version}`;
+          }
+        })
+        .catch(() => {
+          const versionText = document.getElementById('version-text');
+          if (versionText) {
+            versionText.textContent = 'Version info unavailable';
+          }
+        });
+      
       // Start checking for site availability every 3 seconds
       setInterval(checkSiteStatus, 3000);
       
@@ -437,6 +453,7 @@
 
   <div class="footer">
     <p>Powered by <span id="host"></span></p>
+    <p id="version-text" style="font-size: smaller; opacity: 0.7; margin-top: 5px;">Loading version...</p>
   </div>
 </body>
 

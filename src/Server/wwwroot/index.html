@@ -506,6 +506,31 @@
       }
     }
 
+    // Version loading function
+    function loadVersionInfo() {
+      fetch('/version.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Version info not available');
+          }
+          return response.json();
+        })
+        .then(data => {
+          const versionText = document.getElementById('version-text');
+          if (versionText) {
+            versionText.textContent = `Version ${data.version}`;
+            versionText.title = `Built: ${data.buildDate}`;
+          }
+        })
+        .catch(error => {
+          console.log('Version info not available:', error);
+          const versionText = document.getElementById('version-text');
+          if (versionText) {
+            versionText.textContent = 'Version info unavailable';
+          }
+        });
+    }
+
 
   </script>
   <script>
@@ -526,6 +551,9 @@
       const savedColorCoded = getColorCodedPreference();
       updateColorCodedIcon(savedColorCoded);
       default_options.colorCoded = savedColorCoded;
+      
+      // Load and display version
+      loadVersionInfo();
       
       // Page load animations disabled to prevent blue background animation and scroll issues
       
@@ -1720,6 +1748,11 @@ Full: All special characters including symbols that some sites may not accept.</
         </li>
       </ul>
       <p>Thank you so much for using this site and all of your support! My family and I appreciate it greatly!</p>
+    </div>
+    
+    <!-- Version Display -->
+    <div id="version-info" style="margin-top: 20px; padding: 10px; font-size: small; color: var(--subtitle-color); text-align: center; border-top: 1px solid var(--border-color);">
+      <span id="version-text">Loading version...</span>
     </div>
   </div>
 
