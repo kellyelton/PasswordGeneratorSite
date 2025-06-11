@@ -1004,19 +1004,16 @@
       font-weight: bold;
       vertical-align: middle;
     }
-
     .password-display {
       font-family: 'Courier New', 'Monaco', monospace;
-      word-break: break-word;
-      white-space: normal;
+      word-break: break-all;
+      white-space: pre-wrap;
       user-select: all;
       -webkit-user-select: all;
       -moz-user-select: all;
       -ms-user-select: all;
-      overflow-wrap: break-word;
-    }
-
-    /* Constrain password box size to match input fields */
+      overflow-wrap: anywhere;
+    }/* Constrain password box size to match input fields */
     #password {
       max-width: 400px;
       width: auto;
@@ -1024,8 +1021,8 @@
       height: auto;
       padding: .375rem .75rem;
       font-size: 1.1rem;
-      display: flex;
-      align-items: center;
+      display: block;
+      line-height: 1.5;
     }
 
     /* Responsive design for mobile devices */
