@@ -26,7 +26,7 @@
       includeUppercase: true,
       includeNumeric: true,
       includeSpecial: true,
-      excludeSimilar: true,
+      includeAmbiguous: false,
       characterProfile: 'conservative',
     };
 
@@ -36,7 +36,7 @@
         includeUppercase = true,
         includeNumeric = true,
         includeSpecial = true,
-        excludeSimilar = true,
+        includeAmbiguous = false,
         characterProfile = 'conservative',
         plength = 12
       } = options;
@@ -76,7 +76,7 @@
         ...(includeNumeric ? characters.numeric : ''),
       ].join('');
 
-      if (excludeSimilar) {
+      if (!includeAmbiguous) {
         validCharacters = [...validCharacters].filter(c => !characters.similar.includes(c)).join('');
       }
 
@@ -193,7 +193,7 @@
           includeUppercase: form.elements.includeUppercase.checked,
           includeNumeric: form.elements.includeNumeric.checked,
           includeSpecial: form.elements.includeSpecial.checked,
-          excludeSimilar: form.elements.excludeSimilar.checked,
+          includeAmbiguous: form.elements.includeAmbiguous.checked,
           characterProfile: form.elements.characterProfile.value,
         };
 
@@ -322,6 +322,7 @@
       display: inline-block;
       margin-left: 5px;
       cursor: help;
+      vertical-align: middle;
     }
 
     .tooltip .tooltiptext {
@@ -341,6 +342,35 @@
       transition: opacity 0.3s;
       font-size: 0.9em;
       line-height: 1.3;
+      /* Keep tooltips within viewport bounds */
+      max-width: calc(100vw - 20px);
+      word-wrap: break-word;
+    }
+
+    /* Adjust tooltip position when it would go outside the viewport */
+    .tooltip .tooltiptext::before {
+      content: "";
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #333 transparent transparent transparent;
+    }
+
+    /* Position tooltip on the right side if too close to left edge */
+    .tooltip:first-child .tooltiptext,
+    .tooltip:nth-child(2) .tooltiptext {
+      left: 0;
+      margin-left: 0;
+    }
+
+    /* Position tooltip on the left side if too close to right edge */
+    .tooltip:last-child .tooltiptext {
+      right: 0;
+      left: auto;
+      margin-left: 0;
     }
 
     .tooltip .tooltiptext::after {
@@ -396,7 +426,11 @@
             <label for="characterProfile">Character Set:
               <span class="tooltip">
                 <div class="tooltip-icon">?</div>
-                <span class="tooltiptext">Conservative: Safe characters that work on most websites. Standard: Includes brackets and punctuation. Full: All special characters including symbols that some sites may not accept.</span>
+                <span class="tooltiptext">Conservative: Safe characters that work on most websites.
+
+Standard: Includes brackets and punctuation.
+
+Full: All special characters including symbols that some sites may not accept.</span>
               </span>
             </label>
             <select id="characterProfile" name="characterProfile" class="form-control">
@@ -442,11 +476,11 @@
             </label>
           </div>
           <div class="form-group form-check">
-            <input type="checkbox" name="excludeSimilar" class="form-check-input">
-            <label class="form-check-label">Exclude confusing characters (i, I, l, L, 1, 0, O)
+            <input type="checkbox" name="includeAmbiguous" class="form-check-input">
+            <label class="form-check-label">Include ambiguous characters
               <span class="tooltip">
                 <div class="tooltip-icon">?</div>
-                <span class="tooltiptext">Excludes characters that look similar and can be confused when typing, like lowercase 'i', uppercase 'I', lowercase 'l', uppercase 'L', the number '1', zero '0', and uppercase 'O'.</span>
+                <span class="tooltiptext">Include characters that look similar and can be confused when typing, like lowercase 'i', uppercase 'I', lowercase 'l', uppercase 'L', the number '1', zero '0', and uppercase 'O'.</span>
               </span>
             </label>
           </div>
