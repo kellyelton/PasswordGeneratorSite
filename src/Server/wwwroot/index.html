@@ -179,9 +179,14 @@
       return null;
     }
     function reset_form() {
-      // reset the form to default_options
+      // reset the form to default_options, but preserve theme and animations
       var form = document.getElementById('generate-password-form');
       for (var key in default_options) {
+        // Skip theme to preserve user's theme preference
+        if (key === 'theme') {
+          continue;
+        }
+        
         var element = form.elements[key];
         if (element) {
           if (element instanceof HTMLInputElement && element.type == 'checkbox') {
