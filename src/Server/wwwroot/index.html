@@ -270,21 +270,7 @@
       const html = document.documentElement;
       const isAnimationEnabled = getAnimationPreference();
       
-      // Add theme transition animation if animations are enabled
-      if (isAnimationEnabled) {
-        html.classList.add('theme-transition');
-        const mainDiv = document.getElementById('main');
-        if (mainDiv) {
-          mainDiv.classList.add('theme-background-slide');
-        }
-        
-        setTimeout(() => {
-          html.classList.remove('theme-transition');
-          if (mainDiv) {
-            mainDiv.classList.remove('theme-background-slide');
-          }
-        }, 300);
-      }
+      // Theme transition animations disabled as they are not working properly
       
       if (theme === 'system') {
         html.removeAttribute('data-theme');
@@ -388,20 +374,7 @@
       const savedAnimations = getAnimationPreference();
       applyAnimations(savedAnimations);
       
-      // Add page load animation if animations are enabled
-      if (savedAnimations) {
-        document.body.classList.add('page-load-animation');
-        const mainDiv = document.getElementById('main');
-        if (mainDiv) {
-          mainDiv.classList.add('background-gradient-load');
-        }
-        setTimeout(() => {
-          document.body.classList.remove('page-load-animation');
-          if (mainDiv) {
-            mainDiv.classList.remove('background-gradient-load');
-          }
-        }, 1200);
-      }
+      // Page load animations disabled to prevent blue background animation and scroll issues
       
       const form = document.getElementById('generate-password-form');
 
