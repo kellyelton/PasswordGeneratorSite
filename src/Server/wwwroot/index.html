@@ -161,6 +161,54 @@
       // Copy the text to the clipboard
       document.execCommand('copy');
     }
+
+    function adjustTooltipPosition() {
+      const tooltips = document.querySelectorAll('.tooltip');
+      
+      tooltips.forEach(tooltip => {
+        const tooltipText = tooltip.querySelector('.tooltiptext');
+        if (!tooltipText) return;
+
+        // Reset classes
+        tooltipText.classList.remove('tooltip-left', 'tooltip-right', 'tooltip-center');
+        
+        // Get tooltip trigger position
+        const triggerRect = tooltip.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const margin = 20; // Minimum margin from edges
+        
+        // Calculate dynamic tooltip width for smaller screens
+        let tooltipWidth = 250; // Default tooltip width
+        const maxWidth = viewportWidth - (margin * 2);
+        if (tooltipWidth > maxWidth) {
+          tooltipWidth = maxWidth;
+          tooltipText.style.width = tooltipWidth + 'px';
+        } else {
+          tooltipText.style.width = '250px'; // Reset to default
+        }
+        
+        // Calculate positions
+        const triggerCenter = triggerRect.left + (triggerRect.width / 2);
+        const tooltipLeft = triggerCenter - (tooltipWidth / 2);
+        const tooltipRight = triggerCenter + (tooltipWidth / 2);
+        
+        // Determine positioning
+        if (tooltipLeft < margin) {
+          // Too close to left edge - align tooltip to left
+          tooltipText.classList.add('tooltip-left');
+        } else if (tooltipRight > (viewportWidth - margin)) {
+          // Too close to right edge - align tooltip to right
+          tooltipText.classList.add('tooltip-right');
+        } else {
+          // Enough space - center the tooltip
+          tooltipText.classList.add('tooltip-center');
+          // Update margin for dynamic width
+          if (tooltipWidth !== 250) {
+            tooltipText.style.marginLeft = '-' + (tooltipWidth / 2) + 'px';
+          }
+        }
+      });
+    }
   </script>
   <script>
     window.onload = function () {
@@ -214,6 +262,12 @@
 
       // Generate a password
       form.dispatchEvent(new Event('submit', { cancelable: true }));
+      
+      // Initialize tooltip positioning
+      adjustTooltipPosition();
+      
+      // Update tooltip positioning on window resize
+      window.addEventListener('resize', adjustTooltipPosition);
     };
   </script>
   <style>
@@ -334,7 +388,7 @@
       border-radius: 6px;
       padding: 8px;
       position: absolute;
-      z-index: 1;
+      z-index: 1000;
       bottom: 125%;
       left: 50%;
       margin-left: -125px;
@@ -345,6 +399,8 @@
       /* Keep tooltips within viewport bounds */
       max-width: calc(100vw - 20px);
       word-wrap: break-word;
+      /* Ensure minimum margins from viewport edges */
+      min-width: 200px;
     }
 
     /* Adjust tooltip position when it would go outside the viewport */
@@ -359,18 +415,40 @@
       border-color: #333 transparent transparent transparent;
     }
 
-    /* Position tooltip on the right side if too close to left edge */
-    .tooltip:first-child .tooltiptext,
-    .tooltip:nth-child(2) .tooltiptext {
+    /* Dynamic positioning classes added by JavaScript */
+    .tooltip .tooltiptext.tooltip-left {
       left: 0;
       margin-left: 0;
     }
 
-    /* Position tooltip on the left side if too close to right edge */
-    .tooltip:last-child .tooltiptext {
+    .tooltip .tooltiptext.tooltip-right {
       right: 0;
       left: auto;
       margin-left: 0;
+    }
+
+    .tooltip .tooltiptext.tooltip-center {
+      left: 50%;
+      margin-left: -125px;
+    }
+
+    /* Adjust arrow position for left-aligned tooltips */
+    .tooltip .tooltiptext.tooltip-left::before {
+      left: 25px;
+      margin-left: 0;
+    }
+
+    /* Adjust arrow position for right-aligned tooltips */
+    .tooltip .tooltiptext.tooltip-right::before {
+      left: auto;
+      right: 25px;
+      margin-left: 0;
+    }
+
+    /* Center arrow for center-aligned tooltips */
+    .tooltip .tooltiptext.tooltip-center::before {
+      left: 50%;
+      margin-left: -5px;
     }
 
     .tooltip .tooltiptext::after {
