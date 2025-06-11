@@ -123,6 +123,16 @@
 
     function displayPassword(password, colorCoded) {
       const passwordElement = document.getElementById('password');
+      const isAnimationEnabled = getAnimationPreference();
+      
+      // Add animation class if animations are enabled
+      if (isAnimationEnabled) {
+        passwordElement.classList.add('password-generate-animation');
+        // Remove the class after animation completes
+        setTimeout(() => {
+          passwordElement.classList.remove('password-generate-animation');
+        }, 600);
+      }
       
       if (colorCoded) {
         // Define all possible special characters from all profiles combined
@@ -258,6 +268,15 @@
 
     function applyTheme(theme) {
       const html = document.documentElement;
+      const isAnimationEnabled = getAnimationPreference();
+      
+      // Add theme transition animation if animations are enabled
+      if (isAnimationEnabled) {
+        html.classList.add('theme-transition');
+        setTimeout(() => {
+          html.classList.remove('theme-transition');
+        }, 300);
+      }
       
       if (theme === 'system') {
         html.removeAttribute('data-theme');
@@ -303,12 +322,71 @@
       setThemePreference(nextTheme);
       applyTheme(nextTheme);
     }
+
+    // Animation management functions
+    function getAnimationPreference() {
+      const saved = localStorage.getItem('animations');
+      if (saved !== null) {
+        return saved === 'true';
+      }
+      // Default to true, but respect user's motion preferences
+      return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function setAnimationPreference(enabled) {
+      localStorage.setItem('animations', enabled.toString());
+    }
+
+    function applyAnimations(enabled) {
+      const html = document.documentElement;
+      
+      if (enabled) {
+        html.setAttribute('data-animations', 'enabled');
+      } else {
+        html.setAttribute('data-animations', 'disabled');
+      }
+      
+      updateAnimationIcon(enabled);
+    }
+
+    function updateAnimationIcon(enabled) {
+      const animationToggle = document.getElementById('animation-toggle');
+      if (!animationToggle) return;
+      
+      if (enabled) {
+        animationToggle.classList.add('animation-enabled');
+        animationToggle.title = 'Disable animations';
+      } else {
+        animationToggle.classList.remove('animation-enabled');
+        animationToggle.title = 'Enable animations';
+      }
+    }
+
+    function toggleAnimations() {
+      const currentEnabled = getAnimationPreference();
+      const newEnabled = !currentEnabled;
+      
+      setAnimationPreference(newEnabled);
+      applyAnimations(newEnabled);
+    }
   </script>
   <script>
     window.onload = function () {
       // Initialize theme
       const savedTheme = getThemePreference();
       applyTheme(savedTheme);
+      
+      // Initialize animations
+      const savedAnimations = getAnimationPreference();
+      applyAnimations(savedAnimations);
+      
+      // Add page load animation if animations are enabled
+      if (savedAnimations) {
+        document.body.classList.add('page-load-animation');
+        setTimeout(() => {
+          document.body.classList.remove('page-load-animation');
+        }, 800);
+      }
       
       const form = document.getElementById('generate-password-form');
 
@@ -363,6 +441,12 @@
       document.getElementById('theme-toggle').addEventListener('click', event => {
         event.preventDefault();
         toggleTheme();
+      });
+
+      // Add event listener for animation toggle button
+      document.getElementById('animation-toggle').addEventListener('click', event => {
+        event.preventDefault();
+        toggleAnimations();
       });
 
       // Add event listener for colorCoded checkbox to re-render password
@@ -756,6 +840,126 @@
       display: flex;
       align-items: center;
     }
+
+    .animation-toggle {
+      background-color: var(--theme-btn-bg);
+      color: var(--theme-btn-color);
+      border: 1px solid var(--theme-btn-border);
+      border-radius: .25rem;
+      padding: .375rem .5rem;
+      margin-left: 10px;
+      cursor: pointer;
+      transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+    }
+
+    .animation-toggle:hover {
+      background-color: var(--theme-btn-hover-bg);
+    }
+
+    .animation-toggle svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Continuous animation when animations are enabled */
+    .animation-toggle.animation-enabled .animation-icon {
+      animation: spin 2s linear infinite;
+    }
+
+    /* Animation keyframes */
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes colorShift {
+      0% {
+        filter: hue-rotate(0deg);
+      }
+      100% {
+        filter: hue-rotate(360deg);
+      }
+    }
+
+    /* Animation classes - only applied when data-animations="enabled" */
+    [data-animations="enabled"] .page-load-animation {
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    [data-animations="enabled"] .theme-transition {
+      transition: all 0.3s ease-in-out;
+    }
+
+    [data-animations="enabled"] .password-generate-animation {
+      animation: pulse 0.6s ease-in-out;
+    }
+
+    [data-animations="enabled"] .form-group {
+      animation: slideIn 0.5s ease-out;
+    }
+
+    [data-animations="enabled"] .form-group:nth-child(1) { animation-delay: 0.1s; }
+    [data-animations="enabled"] .form-group:nth-child(2) { animation-delay: 0.2s; }
+    [data-animations="enabled"] .form-group:nth-child(3) { animation-delay: 0.3s; }
+    [data-animations="enabled"] .form-group:nth-child(4) { animation-delay: 0.4s; }
+    [data-animations="enabled"] .form-group:nth-child(5) { animation-delay: 0.5s; }
+    [data-animations="enabled"] .form-group:nth-child(6) { animation-delay: 0.6s; }
+    [data-animations="enabled"] .form-group:nth-child(7) { animation-delay: 0.7s; }
+    [data-animations="enabled"] .form-group:nth-child(8) { animation-delay: 0.8s; }
+
+    /* Respect user's motion preferences */
+    @media (prefers-reduced-motion: reduce) {
+      .animation-toggle.animation-enabled .animation-icon {
+        animation: none;
+      }
+      
+      [data-animations="enabled"] .page-load-animation,
+      [data-animations="enabled"] .theme-transition,
+      [data-animations="enabled"] .password-generate-animation,
+      [data-animations="enabled"] .form-group {
+        animation: none;
+        transition: none;
+      }
+    }
   </style>
 </head>
 
@@ -889,6 +1093,13 @@ Full: All special characters including symbols that some sites may not accept.</
                 <!-- Dark theme icon -->
                 <svg id="dark-icon" class="theme-icon" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              </button>
+              <button type="button" id="animation-toggle" class="animation-toggle" title="Toggle animations">
+                <!-- Animation icon -->
+                <svg class="animation-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m15.5-6.5l-4.5 4.5m-6-6l4.5 4.5m4.5-10.5l-4.5 4.5m-6 6l4.5-4.5"></path>
                 </svg>
               </button>
             </div>
