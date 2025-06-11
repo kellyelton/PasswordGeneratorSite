@@ -454,6 +454,13 @@
       
       // Update tooltip positioning on window resize
       window.addEventListener('resize', adjustTooltipPosition);
+      
+      // Prevent tooltip clicks from triggering checkbox clicks
+      document.querySelectorAll('.tooltip').forEach(tooltip => {
+        tooltip.addEventListener('click', event => {
+          event.stopPropagation();
+        });
+      });
     };
   </script>
   <style>
