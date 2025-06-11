@@ -391,9 +391,16 @@
       // Add page load animation if animations are enabled
       if (savedAnimations) {
         document.body.classList.add('page-load-animation');
+        const mainDiv = document.getElementById('main');
+        if (mainDiv) {
+          mainDiv.classList.add('background-gradient-load');
+        }
         setTimeout(() => {
           document.body.classList.remove('page-load-animation');
-        }, 800);
+          if (mainDiv) {
+            mainDiv.classList.remove('background-gradient-load');
+          }
+        }, 1200);
       }
       
       const form = document.getElementById('generate-password-form');
@@ -951,6 +958,24 @@
       }
     }
 
+    @keyframes backgroundGradientLoad {
+      0% {
+        background: linear-gradient(135deg, var(--bg-body) 0%, var(--bg-color) 100%);
+        background-size: 400% 400%;
+        background-position: 100% 100%;
+      }
+      50% {
+        background: linear-gradient(135deg, var(--bg-body) 0%, var(--btn-primary-bg) 30%, var(--bg-color) 100%);
+        background-size: 400% 400%;
+        background-position: 50% 50%;
+      }
+      100% {
+        background: var(--bg-color);
+        background-size: 100% 100%;
+        background-position: 0% 0%;
+      }
+    }
+
     /* Initial states for animated elements when animations are enabled */
     [data-animations="enabled"] .form-group {
       opacity: 0;
@@ -962,6 +987,11 @@
       opacity: 0;
       transform: translateY(30px);
       animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    /* Background gradient animation on page load */
+    [data-animations="enabled"] .background-gradient-load {
+      animation: backgroundGradientLoad 1.2s ease-in-out forwards;
     }
 
     [data-animations="enabled"] .theme-transition {
@@ -1013,6 +1043,7 @@
       [data-animations="enabled"] .page-load-animation,
       [data-animations="enabled"] .theme-transition,
       [data-animations="enabled"] .password-generate-animation,
+      [data-animations="enabled"] .background-gradient-load,
       [data-animations="enabled"] .form-group {
         animation: none;
         transition: none;
