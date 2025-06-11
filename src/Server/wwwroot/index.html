@@ -530,7 +530,7 @@
 
       form.elements.copypassword.addEventListener('click', event => {
         event.preventDefault();
-        copyPassword();
+        copyPassword(true); // Show notification for manual copy too
       });
 
       // Add event listener for theme toggle button
