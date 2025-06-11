@@ -583,13 +583,46 @@
       
       // Update tooltip positioning on window resize
       window.addEventListener('resize', adjustTooltipPosition);
-      
-      // Prevent tooltip clicks from triggering checkbox clicks
+        // Prevent tooltip clicks from triggering checkbox clicks
       document.querySelectorAll('.tooltip').forEach(tooltip => {
         tooltip.addEventListener('click', event => {
           event.preventDefault();
           event.stopPropagation();
         });
+      });
+
+      // Ripple Effect Function
+      function createRipple(event) {
+        const button = event.currentTarget;
+        const rect = button.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = event.clientX - rect.left - size / 2;
+        const y = event.clientY - rect.top - size / 2;
+        
+        // Remove any existing ripples
+        const existingRipples = button.querySelectorAll('.ripple');
+        existingRipples.forEach(ripple => ripple.remove());
+        
+        // Create new ripple element
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple');
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = x + 'px';
+        ripple.style.top = y + 'px';
+        
+        button.appendChild(ripple);
+          // Remove ripple after animation completes
+        setTimeout(() => {
+          if (ripple.parentNode) {
+            ripple.remove();
+          }
+        }, 900);
+      }
+
+      // Add ripple effect to all buttons
+      const buttons = document.querySelectorAll('.btn, .theme-toggle, .animation-toggle, .auto-clipboard-toggle');
+      buttons.forEach(button => {
+        button.addEventListener('click', createRipple);
       });
     };
   </script>
@@ -1127,8 +1160,6 @@
       height: 20px;
     }
 
-
-
     /* Animation keyframes */
     @keyframes spin {
       from { transform: rotate(0deg); }
@@ -1348,11 +1379,54 @@
       .logo-section {
         align-items: flex-start;
       }
-
       .logo-section i {
         margin-left: 8px;
         text-align: left;
       }
+    }
+
+    /* Ripple Effect Styles */
+    .btn, .theme-toggle, .animation-toggle, .auto-clipboard-toggle {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.6);
+      transform: scale(0);
+      animation: ripple-animation 0.9s ease-out;
+      pointer-events: none;
+    }
+
+    @keyframes ripple-animation {
+      0% {
+        transform: scale(0);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    /* Ensure dark theme has appropriate ripple color */
+    [data-theme="dark"] .ripple {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* For theme toggle buttons, adjust ripple color */
+    .theme-toggle .ripple,
+    .animation-toggle .ripple,
+    .auto-clipboard-toggle .ripple {
+      background-color: rgba(0, 123, 255, 0.4);
+    }
+
+    [data-theme="dark"] .theme-toggle .ripple,
+    [data-theme="dark"] .animation-toggle .ripple,
+    [data-theme="dark"] .auto-clipboard-toggle .ripple {
+      background-color: rgba(255, 255, 255, 0.3);
     }
   </style>
 </head>
