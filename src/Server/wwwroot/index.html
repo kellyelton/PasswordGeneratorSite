@@ -29,6 +29,7 @@
       includeAmbiguous: false,
       characterProfile: 'conservative',
       colorCoded: true,
+      theme: 'system',
     };
 
     function generatePassword(length, options) {
@@ -241,9 +242,74 @@
         }
       });
     }
+
+    // Theme management functions
+    function getThemePreference() {
+      const saved = localStorage.getItem('theme');
+      if (saved) {
+        return saved;
+      }
+      return 'system';
+    }
+
+    function setThemePreference(theme) {
+      localStorage.setItem('theme', theme);
+    }
+
+    function applyTheme(theme) {
+      const html = document.documentElement;
+      
+      if (theme === 'system') {
+        html.removeAttribute('data-theme');
+      } else {
+        html.setAttribute('data-theme', theme);
+      }
+      
+      updateThemeIcon(theme);
+    }
+
+    function updateThemeIcon(theme) {
+      const systemIcon = document.getElementById('system-icon');
+      const lightIcon = document.getElementById('light-icon');
+      const darkIcon = document.getElementById('dark-icon');
+      
+      // Hide all icons
+      systemIcon.style.display = 'none';
+      lightIcon.style.display = 'none';
+      darkIcon.style.display = 'none';
+      
+      // Show the appropriate icon
+      if (theme === 'system') {
+        systemIcon.style.display = 'block';
+      } else if (theme === 'light') {
+        lightIcon.style.display = 'block';
+      } else if (theme === 'dark') {
+        darkIcon.style.display = 'block';
+      }
+    }
+
+    function toggleTheme() {
+      const currentTheme = getThemePreference();
+      let nextTheme;
+      
+      if (currentTheme === 'system') {
+        nextTheme = 'light';
+      } else if (currentTheme === 'light') {
+        nextTheme = 'dark';
+      } else {
+        nextTheme = 'system';
+      }
+      
+      setThemePreference(nextTheme);
+      applyTheme(nextTheme);
+    }
   </script>
   <script>
     window.onload = function () {
+      // Initialize theme
+      const savedTheme = getThemePreference();
+      applyTheme(savedTheme);
+      
       const form = document.getElementById('generate-password-form');
 
       let options = load_options();
@@ -293,6 +359,12 @@
         copyPassword();
       });
 
+      // Add event listener for theme toggle button
+      document.getElementById('theme-toggle').addEventListener('click', event => {
+        event.preventDefault();
+        toggleTheme();
+      });
+
       // Add event listener for colorCoded checkbox to re-render password
       form.elements.colorCoded.addEventListener('change', event => {
         const passwordElement = document.getElementById('password');
@@ -313,6 +385,98 @@
     };
   </script>
   <style>
+    :root {
+      /* Light theme variables */
+      --bg-color: #ffffff;
+      --bg-body: #171026;
+      --text-color: #495057;
+      --border-color: #ced4da;
+      --focus-border-color: #80bdff;
+      --focus-shadow: rgba(0, 123, 255, .25);
+      --btn-primary-bg: #007bff;
+      --btn-primary-border: #007bff;
+      --btn-primary-hover-bg: #0069d9;
+      --btn-primary-hover-border: #0062cc;
+      --btn-secondary-bg: #6c757d;
+      --btn-secondary-border: #6c757d;
+      --btn-secondary-hover-bg: #5a6268;
+      --btn-secondary-hover-border: #545b62;
+      --tooltip-bg: #333;
+      --tooltip-border: #333;
+      --tooltip-icon-bg: #007bff;
+      --footer-border: #276fd7;
+      --footer-support-bg: #dfdaff;
+      --footer-support-border: #d74a4a;
+      --host-color: #0c5fac;
+      --subtitle-color: #a3b5c5;
+      --theme-btn-bg: #ffffff;
+      --theme-btn-color: #495057;
+      --theme-btn-border: #ced4da;
+      --theme-btn-hover-bg: #f8f9fa;
+    }
+
+    [data-theme="dark"] {
+      /* Dark theme variables */
+      --bg-color: #1a1a1a;
+      --bg-body: #0d0d0d;
+      --text-color: #e0e0e0;
+      --border-color: #404040;
+      --focus-border-color: #4d94ff;
+      --focus-shadow: rgba(77, 148, 255, .25);
+      --btn-primary-bg: #0d6efd;
+      --btn-primary-border: #0d6efd;
+      --btn-primary-hover-bg: #0b5ed7;
+      --btn-primary-hover-border: #0a58ca;
+      --btn-secondary-bg: #6c757d;
+      --btn-secondary-border: #6c757d;
+      --btn-secondary-hover-bg: #5c636a;
+      --btn-secondary-hover-border: #565e64;
+      --tooltip-bg: #2a2a2a;
+      --tooltip-border: #2a2a2a;
+      --tooltip-icon-bg: #0d6efd;
+      --footer-border: #4d94ff;
+      --footer-support-bg: #2a2a2a;
+      --footer-support-border: #dc3545;
+      --host-color: #4d94ff;
+      --subtitle-color: #9ca3af;
+      --theme-btn-bg: #2a2a2a;
+      --theme-btn-color: #e0e0e0;
+      --theme-btn-border: #404040;
+      --theme-btn-hover-bg: #404040;
+    }
+
+    /* Use system preference when no explicit theme is set */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --bg-color: #1a1a1a;
+        --bg-body: #0d0d0d;
+        --text-color: #e0e0e0;
+        --border-color: #404040;
+        --focus-border-color: #4d94ff;
+        --focus-shadow: rgba(77, 148, 255, .25);
+        --btn-primary-bg: #0d6efd;
+        --btn-primary-border: #0d6efd;
+        --btn-primary-hover-bg: #0b5ed7;
+        --btn-primary-hover-border: #0a58ca;
+        --btn-secondary-bg: #6c757d;
+        --btn-secondary-border: #6c757d;
+        --btn-secondary-hover-bg: #5c636a;
+        --btn-secondary-hover-border: #565e64;
+        --tooltip-bg: #2a2a2a;
+        --tooltip-border: #2a2a2a;
+        --tooltip-icon-bg: #0d6efd;
+        --footer-border: #4d94ff;
+        --footer-support-bg: #2a2a2a;
+        --footer-support-border: #dc3545;
+        --host-color: #4d94ff;
+        --subtitle-color: #9ca3af;
+        --theme-btn-bg: #2a2a2a;
+        --theme-btn-color: #e0e0e0;
+        --theme-btn-border: #404040;
+        --theme-btn-hover-bg: #404040;
+      }
+    }
+
     .form-control {
       display: block;
       width: 100%;
@@ -321,20 +485,20 @@
       font-size: 1rem;
       font-weight: 400;
       line-height: 1.5;
-      color: #495057;
-      background-color: #fff;
+      color: var(--text-color);
+      background-color: var(--bg-color);
       background-clip: padding-box;
-      border: 1px solid #ced4da;
+      border: 1px solid var(--border-color);
       border-radius: .25rem;
       transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
     }
 
     .form-control:focus {
-      color: #495057;
-      background-color: #fff;
-      border-color: #80bdff;
+      color: var(--text-color);
+      background-color: var(--bg-color);
+      border-color: var(--focus-border-color);
       outline: 0;
-      box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
+      box-shadow: 0 0 0 .2rem var(--focus-shadow);
     }
 
     .form-group {
@@ -377,31 +541,33 @@
 
     .btn-primary {
       color: #fff;
-      background-color: #007bff;
-      border-color: #007bff;
+      background-color: var(--btn-primary-bg);
+      border-color: var(--btn-primary-border);
     }
 
     .btn-primary:hover {
       color: #fff;
-      background-color: #0069d9;
-      border-color: #0062cc;
+      background-color: var(--btn-primary-hover-bg);
+      border-color: var(--btn-primary-hover-border);
     }
 
     .btn-secondary {
       color: #fff;
-      background-color: #6c757d;
-      border-color: #6c757d;
+      background-color: var(--btn-secondary-bg);
+      border-color: var(--btn-secondary-border);
     }
 
     .btn-secondary:hover {
       color: #fff;
-      background-color: #5a6268;
-      border-color: #545b62;
+      background-color: var(--btn-secondary-hover-bg);
+      border-color: var(--btn-secondary-hover-border);
     }
 
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
+      background-color: var(--bg-body);
+      color: var(--text-color);
     }
 
     #copypassword {
@@ -424,7 +590,7 @@
     .tooltip .tooltiptext {
       visibility: hidden;
       width: 250px;
-      background-color: #333;
+      background-color: var(--tooltip-bg);
       color: #fff;
       text-align: left;
       border-radius: 6px;
@@ -454,7 +620,7 @@
       margin-left: -5px;
       border-width: 5px;
       border-style: solid;
-      border-color: #333 transparent transparent transparent;
+      border-color: var(--tooltip-border) transparent transparent transparent;
     }
 
     /* Dynamic positioning classes added by JavaScript */
@@ -501,7 +667,7 @@
       margin-left: -5px;
       border-width: 5px;
       border-style: solid;
-      border-color: #333 transparent transparent transparent;
+      border-color: var(--tooltip-border) transparent transparent transparent;
     }
 
     .tooltip:hover .tooltiptext {
@@ -513,7 +679,7 @@
       display: inline-block;
       width: 16px;
       height: 16px;
-      background-color: #007bff;
+      background-color: var(--tooltip-icon-bg);
       border-radius: 50%;
       color: white;
       text-align: center;
@@ -545,14 +711,44 @@
       color: #007bff;
       font-weight: 500;
     }
+
+    .theme-toggle {
+      background-color: var(--theme-btn-bg);
+      color: var(--theme-btn-color);
+      border: 1px solid var(--theme-btn-border);
+      border-radius: .25rem;
+      padding: .375rem .5rem;
+      margin-left: 10px;
+      cursor: pointer;
+      transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+    }
+
+    .theme-toggle:hover {
+      background-color: var(--theme-btn-hover-bg);
+    }
+
+    .theme-toggle svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .copy-and-theme-container {
+      display: flex;
+      align-items: center;
+    }
   </style>
 </head>
 
-<body style="padding: 0px; margin:0px; background-color: #171026;">
-  <div id="main" style="padding: 1px 20px 20px 20px; background-color: white">
-    <h1 style="margin-bottom: 6px;"><span id="host" style="color: #0c5fac"></span> &nbsp;<i
-        style="color: #3f3f3f; font-size: smaller">password generator</i></h1>
-    <i style="color: #a3b5c5">&nbsp;&nbsp;No Ads, No Third Party Trackers, No BS</i>
+<body style="padding: 0px; margin:0px; background-color: var(--bg-body);">
+  <div id="main" style="padding: 1px 20px 20px 20px; background-color: var(--bg-color)">
+    <h1 style="margin-bottom: 6px;"><span id="host" style="color: var(--host-color)"></span> &nbsp;<i
+        style="color: var(--text-color); font-size: smaller">password generator</i></h1>
+    <i style="color: var(--subtitle-color)">&nbsp;&nbsp;No Ads, No Third Party Trackers, No BS</i>
     <br />
     <br />
     <div>
@@ -647,24 +843,50 @@ Full: All special characters including symbols that some sites may not accept.</
             <div id="password" class="form-control password-display" readonly tabindex="0"></div>
           </div>
           <div class="form-group">
-            <button type="button" id="copypassword" class="btn btn-primary">
-              <svg class="password-input__icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-              </svg>
-              Copy password&nbsp;
-            </button>
+            <div class="copy-and-theme-container">
+              <button type="button" id="copypassword" class="btn btn-primary">
+                <svg class="password-input__icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                </svg>
+                Copy password&nbsp;
+              </button>
+              <button type="button" id="theme-toggle" class="theme-toggle" title="Toggle theme">
+                <!-- System theme icon (default) -->
+                <svg id="system-icon" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+                <!-- Light theme icon -->
+                <svg id="light-icon" class="theme-icon" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <!-- Dark theme icon -->
+                <svg id="dark-icon" class="theme-icon" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              </button>
+            </div>
           </div>
         </form>
       </div>
     </div>
   </div>
-  <hr style="margin: 0px;border: 1px solid #276fd7;" />
+  <hr style="margin: 0px;border: 1px solid var(--footer-border);" />
   <div id="footer" style="padding: 20px; margin: 0px;">
     <div
-      style="font-size: small;border: 6px solid #d74a4a;border-radius: 3px;background-color: #dfdaff;padding: 0px 20px;max-width: 500px; margin-top: 4px;">
-      <a id="supportlink" href="#supportlink"><p style="font-size:large; font-weight: bold; color: #0c5fac">Help Support this Project</p></a>
+      style="font-size: small;border: 6px solid var(--footer-support-border);border-radius: 3px;background-color: var(--footer-support-bg);padding: 0px 20px;max-width: 500px; margin-top: 4px;">
+      <a id="supportlink" href="#supportlink"><p style="font-size:large; font-weight: bold; color: var(--host-color)">Help Support this Project</p></a>
       <p>Hi there! I'm glad you're interested in this project.</p>
       <p>I host this site at a loss and use no tracking or ads.</p>
       <p>I believe we all deserve quality software that doesn't focus on investors, corporations and the bottom
@@ -672,11 +894,11 @@ Full: All special characters including symbols that some sites may not accept.</
       <p>You can support this site by donating through the following platforms:</p>
       <ul>
         <li>
-          <a href="https://www.paypal.com/donate/?hosted_button_id=GJP29NBGZ33B4" style="color: #0c5fac"
+          <a href="https://www.paypal.com/donate/?hosted_button_id=GJP29NBGZ33B4" style="color: var(--host-color)"
             target="_blank">PayPal</a>
         </li>
         <li>
-          <a href="https://github.com/sponsors/kellyelton" style="color: #0c5fac" target="_blank">Sponsor on GitHub</a>
+          <a href="https://github.com/sponsors/kellyelton" style="color: var(--host-color)" target="_blank">Sponsor on GitHub</a>
         </li>
       </ul>
       <p>Thank you so much for using this site and all of your support! My family and I appreciate it greatly!</p>
