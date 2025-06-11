@@ -135,11 +135,28 @@
           let index = Math.floor(Math.random() * password.length);
           password = password.slice(0, index) + password.slice(index + 1);
         }
-      }
+      }      
 
       return password;
     }
 
+    // Reusable function to apply color coding to text
+    function applyColorCoding(text, useColors = true) {
+      // Define all possible special characters from all profiles combined
+      const allSpecialChars = '!@$^*()_-[]{}|<>,.?/~`';
+      
+      return text
+        .split('')
+        .map(char => {
+          if (/\d/.test(char)) {
+            return useColors ? `<span class="password-number">${char}</span>` : char;
+          } else if (allSpecialChars.includes(char)) {
+            return useColors ? `<span class="password-special">${char}</span>` : char;
+          }
+          return char;
+        })
+        .join('');
+    }    
     function displayPassword(password, colorCoded) {
       const passwordElement = document.getElementById('password');
       const isAnimationEnabled = getAnimationPreference();
@@ -154,29 +171,24 @@
       }
       
       if (colorCoded) {
-        // Define all possible special characters from all profiles combined
-        const allSpecialChars = '!@$^*()_-[]{}|<>,.?/~`';
-        
-        // Create colored HTML version
-        const coloredHtml = password
-          .split('')
-          .map(char => {
-            if (/\d/.test(char)) {
-              return `<span class="password-number">${char}</span>`;
-            } else if (allSpecialChars.includes(char)) {
-              return `<span class="password-special">${char}</span>`;
-            }
-            return char;
-          })
-          .join('');
-        passwordElement.innerHTML = coloredHtml;
+        // Use the reusable color coding function
+        passwordElement.innerHTML = applyColorCoding(password, true);
       } else {
         // Display as plain text
         passwordElement.textContent = password;
       }
-      
+
       // Store the plain text password for copying
       passwordElement.dataset.password = password;
+    }
+
+    function updateColorCoding() {
+      const passwordElement = document.getElementById('password');
+      const currentPassword = passwordElement.dataset.password || passwordElement.textContent;
+      if (currentPassword) {
+        const colorCodedEnabled = getColorCodedPreference();
+        displayPassword(currentPassword, colorCodedEnabled);
+      }
     }
     function save_options(options) {
       var storage = {};
@@ -197,12 +209,14 @@
 
       return null;
     }
+    
+    
     function reset_form() {
-      // reset the form to default_options, but preserve theme and animations
+      // reset the form to default_options, but preserve button-based settings (theme, animations, auto-clipboard, color-coded)
       var form = document.getElementById('generate-password-form');
       for (var key in default_options) {
-        // Skip theme to preserve user's theme preference
-        if (key === 'theme') {
+        // Skip all button-based settings - these should not be reset by the Defaults button
+        if (key === 'theme' || key === 'colorCoded') {
           continue;
         }
         
@@ -217,6 +231,7 @@
       }
       
       // Immediately save the reset options so the change is persisted
+      // Only save form-based options, preserve button-based settings
       const resetOptions = {
         plength: default_options.plength,
         includeLowercase: default_options.includeLowercase,
@@ -225,7 +240,7 @@
         includeSpecial: default_options.includeSpecial,
         includeAmbiguous: default_options.includeAmbiguous,
         characterProfile: default_options.characterProfile,
-        colorCoded: default_options.colorCoded,
+        colorCoded: getColorCodedPreference(), // Keep current color-coded setting
       };
       
       save_options(resetOptions);
@@ -435,13 +450,60 @@
         autoClipboardToggle.title = 'Auto-copy to clipboard is OFF';
       }
     }
+    
 
-    function toggleAutoClipboard() {
+   function toggleAutoClipboard() {
       const currentEnabled = getAutoClipboardPreference();
       const newEnabled = !currentEnabled;
       
       setAutoClipboardPreference(newEnabled);
       updateAutoClipboardIcon(newEnabled);
+    }
+
+    // Color-coded characters management functions
+    function getColorCodedPreference() {
+      const saved = localStorage.getItem('colorCodedEnabled');
+      if (saved !== null) {
+        return saved === 'true';
+      }
+      return true; // Default to enabled
+    }
+
+    function setColorCodedPreference(enabled) {
+      localStorage.setItem('colorCodedEnabled', enabled.toString());
+    }
+
+    function updateColorCodedIcon(enabled) {
+      const colorCodedToggle = document.getElementById('color-coded-toggle');
+      if (!colorCodedToggle) return;
+      
+      const enabledIcon = colorCodedToggle.querySelector('.color-enabled');
+      const disabledIcon = colorCodedToggle.querySelector('.color-disabled');
+      
+      if (enabled) {
+        enabledIcon.style.display = 'block';
+        disabledIcon.style.display = 'none';
+        colorCodedToggle.title = 'Color-coded characters is ON';
+      } else {
+        enabledIcon.style.display = 'none';
+        disabledIcon.style.display = 'block';
+        colorCodedToggle.title = 'Color-coded characters is OFF';
+      }
+    }
+
+    function toggleColorCoded() {
+      const currentEnabled = getColorCodedPreference();
+      const newEnabled = !currentEnabled;
+      
+      setColorCodedPreference(newEnabled);
+      updateColorCodedIcon(newEnabled);
+      
+      // Update the default options and regenerate password if one exists
+      default_options.colorCoded = newEnabled;
+      const passwordDiv = document.getElementById('password');
+      if (passwordDiv && passwordDiv.innerHTML.trim() !== '') {
+        updateColorCoding();
+      }
     }
 
 
@@ -460,14 +522,22 @@
       const savedAutoClipboard = getAutoClipboardPreference();
       updateAutoClipboardIcon(savedAutoClipboard);
       
+      // Initialize color-coded
+      const savedColorCoded = getColorCodedPreference();
+      updateColorCodedIcon(savedColorCoded);
+      default_options.colorCoded = savedColorCoded;
+      
       // Page load animations disabled to prevent blue background animation and scroll issues
       
-      const form = document.getElementById('generate-password-form');
-
-      let options = load_options();
+      const form = document.getElementById('generate-password-form');      let options = load_options();
       if (options) {
         console.log(options)
         for (var key in options) {
+          // Skip colorCoded as it's now handled by button toggle
+          if (key === 'colorCoded') {
+            continue;
+          }
+          
           var element = form.elements[key];
           if (element) {
             if (element instanceof HTMLInputElement && element.type == 'checkbox') {
@@ -486,9 +556,7 @@
         document.getElementById('plength-display').textContent = form.elements.plength.value;
       }
 
-      const passwordInput = document.getElementById('password');
-
-      // Function to generate password and save options from current form state
+      const passwordInput = document.getElementById('password');      // Function to generate password and save options from current form state
       function generateAndSavePassword() {
         const length = Number(form.elements.plength.value);
         let options = {
@@ -499,7 +567,7 @@
           includeSpecial: form.elements.includeSpecial.checked,
           includeAmbiguous: form.elements.includeAmbiguous.checked,
           characterProfile: form.elements.characterProfile.value,
-          colorCoded: form.elements.colorCoded.checked,
+          colorCoded: getColorCodedPreference(),
         };
 
         const password = generatePassword(length, options);
@@ -545,18 +613,10 @@
         toggleAutoClipboard();
       });
 
-      // Add event listener for colorCoded checkbox to re-render password and save setting
-      form.elements.colorCoded.addEventListener('change', event => {
-        const passwordElement = document.getElementById('password');
-        const currentPassword = passwordElement.dataset.password || passwordElement.textContent;
-        if (currentPassword) {
-          displayPassword(currentPassword, event.target.checked);
-        }
-        
-        // Save only the colorCoded setting to localStorage
-        const currentOptions = load_options() || {};
-        currentOptions.colorCoded = event.target.checked;
-        save_options(currentOptions);
+      // Add event listener for color-coded toggle button
+      document.getElementById('color-coded-toggle').addEventListener('click', event => {
+        event.preventDefault();
+        toggleColorCoded();
       });
       // Add event listeners for all form inputs to regenerate password on change
       form.elements.plength.addEventListener('input', function() {
@@ -620,7 +680,7 @@
       }
 
       // Add ripple effect to all buttons
-      const buttons = document.querySelectorAll('.btn, .theme-toggle, .animation-toggle, .auto-clipboard-toggle');
+      const buttons = document.querySelectorAll('.btn, .theme-toggle, .animation-toggle, .auto-clipboard-toggle, .color-coded-toggle');
       buttons.forEach(button => {
         button.addEventListener('click', createRipple);
       });
@@ -1135,7 +1195,7 @@
       animation: spin 2s linear infinite;
     }
 
-    .auto-clipboard-toggle {
+ .auto-clipboard-toggle {
       background-color: var(--theme-btn-bg);
       color: var(--theme-btn-color);
       border: 1px solid var(--theme-btn-border);
@@ -1158,6 +1218,40 @@
     .auto-clipboard-toggle svg {
       width: 20px;
       height: 20px;
+    }    
+
+    .color-coded-toggle {
+      background-color: var(--theme-btn-bg);
+      color: var(--theme-btn-color);
+      border: 1px solid var(--theme-btn-border);
+      border-radius: .25rem;
+      padding: .375rem .5rem;
+      margin-left: 10px;
+      cursor: pointer;
+      transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+    }
+
+    .color-coded-toggle:hover {
+      background-color: var(--theme-btn-hover-bg);
+    }
+
+    .character-grid {
+      font-size: 10px;
+      font-family: monospace;
+      font-weight: bold;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .grid-char {
+      display: inline-block;
+      width: 8px;
+      margin: 0 1px;
     }
 
     /* Animation keyframes */
@@ -1386,7 +1480,7 @@
     }
 
     /* Ripple Effect Styles */
-    .btn, .theme-toggle, .animation-toggle, .auto-clipboard-toggle {
+    .btn, .theme-toggle, .animation-toggle, .auto-clipboard-toggle, .color-coded-toggle {
       position: relative;
       overflow: hidden;
     }
@@ -1419,13 +1513,15 @@
     /* For theme toggle buttons, adjust ripple color */
     .theme-toggle .ripple,
     .animation-toggle .ripple,
-    .auto-clipboard-toggle .ripple {
+    .auto-clipboard-toggle .ripple,
+    .color-coded-toggle .ripple {
       background-color: rgba(0, 123, 255, 0.4);
     }
 
     [data-theme="dark"] .theme-toggle .ripple,
     [data-theme="dark"] .animation-toggle .ripple,
-    [data-theme="dark"] .auto-clipboard-toggle .ripple {
+    [data-theme="dark"] .auto-clipboard-toggle .ripple,
+    [data-theme="dark"] .color-coded-toggle .ripple {
       background-color: rgba(255, 255, 255, 0.3);
     }
   </style>
@@ -1515,15 +1611,6 @@ Full: All special characters including symbols that some sites may not accept.</
               </span>
             </label>
           </div>
-          <div class="form-group form-check">
-            <input type="checkbox" id="colorCoded" name="colorCoded" checked class="form-check-input">
-            <label for="colorCoded" class="form-check-label">Color-coded characters
-              <span class="tooltip">
-                <div class="tooltip-icon">?</div>
-                <span class="tooltiptext">Display numbers in red and special characters in light blue to distinguish them from letters in the generated password.</span>
-              </span>
-            </label>
-          </div>
           <div class="form-group">
             <button type="submit" class="btn btn-primary">Generate password</button>
             <button type="reset" class="btn btn-secondary">Defaults</button>
@@ -1579,12 +1666,23 @@ Full: All special characters including symbols that some sites may not accept.</
                   <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
                   <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
                 </svg>
-                <!-- Clipboard with slash icon (disabled state) -->
-                <svg class="clipboard-icon clipboard-disabled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <!-- Clipboard with slash icon (disabled state) -->                <svg class="clipboard-icon clipboard-disabled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
                   <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
                   <line x1="2" y1="2" x2="22" y2="22"></line>
                 </svg>
+              </button>              
+              <button type="button" id="color-coded-toggle" class="color-coded-toggle" title="Color-coded characters is ON">
+                <!-- 2x2 grid of characters (enabled state - colored) -->
+                <div class="color-icon color-enabled character-grid">
+                  <span class="grid-char">A</span><span class="grid-char password-special">@</span><br>
+                  <span class="grid-char password-number">5</span><span class="grid-char">B</span>
+                </div>
+                <!-- 2x2 grid of characters (disabled state - uncolored) -->
+                <div class="color-icon color-disabled character-grid" style="display: none;">
+                  <span class="grid-char">A</span><span class="grid-char">@</span><br>
+                  <span class="grid-char">5</span><span class="grid-char">B</span>
+                </div>
               </button>
             </div>
           </div>
