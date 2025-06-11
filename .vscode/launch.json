@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/Server/bin/Debug/net6.0/PasswordGeneratorSite.dll",
+            "program": "${workspaceFolder}/src/Server/bin/Debug/net8.0/PasswordGeneratorSite.dll",
             "args": [],
             "cwd": "${workspaceFolder}/src/Server",
             "stopAtEntry": false,
