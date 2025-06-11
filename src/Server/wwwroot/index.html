@@ -28,7 +28,7 @@
       includeSpecial: true,
       includeAmbiguous: false,
       characterProfile: 'conservative',
-      colorCoded: false,
+      colorCoded: true,
     };
 
     function generatePassword(length, options) {
@@ -124,12 +124,17 @@
       const passwordElement = document.getElementById('password');
       
       if (colorCoded) {
+        // Define all possible special characters from all profiles combined
+        const allSpecialChars = '!@$^*()_-[]{}|<>,.?/~`';
+        
         // Create colored HTML version
         const coloredHtml = password
           .split('')
           .map(char => {
             if (/\d/.test(char)) {
               return `<span class="password-number">${char}</span>`;
+            } else if (allSpecialChars.includes(char)) {
+              return `<span class="password-special">${char}</span>`;
             }
             return char;
           })
@@ -286,6 +291,15 @@
       form.elements.copypassword.addEventListener('click', event => {
         event.preventDefault();
         copyPassword();
+      });
+
+      // Add event listener for colorCoded checkbox to re-render password
+      form.elements.colorCoded.addEventListener('change', event => {
+        const passwordElement = document.getElementById('password');
+        const currentPassword = passwordElement.dataset.password || passwordElement.textContent;
+        if (currentPassword) {
+          displayPassword(currentPassword, event.target.checked);
+        }
       });
 
       // Generate a password
@@ -519,10 +533,18 @@
       -webkit-user-select: all;
       -moz-user-select: all;
       -ms-user-select: all;
+      min-height: calc(1.5em + .75rem + 2px);
+      height: auto;
+      overflow-wrap: break-word;
     }
 
     .password-number {
       color: #dc3545;
+      font-weight: 500;
+    }
+
+    .password-special {
+      color: #5bc0de;
       font-weight: 500;
     }
   </style>
@@ -610,11 +632,11 @@ Full: All special characters including symbols that some sites may not accept.</
             </label>
           </div>
           <div class="form-group form-check">
-            <input type="checkbox" name="colorCoded" class="form-check-input">
+            <input type="checkbox" name="colorCoded" checked class="form-check-input">
             <label class="form-check-label">Color-coded characters
               <span class="tooltip">
                 <div class="tooltip-icon">?</div>
-                <span class="tooltiptext">Display numbers in a different color (red) to distinguish them from letters in the generated password.</span>
+                <span class="tooltiptext">Display numbers in red and special characters in light blue to distinguish them from letters in the generated password.</span>
               </span>
             </label>
           </div>
