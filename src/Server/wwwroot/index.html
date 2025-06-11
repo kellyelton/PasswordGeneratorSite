@@ -211,7 +211,7 @@
       
       save_options(resetOptions);
     }
-    function copyPassword() {
+    function copyPassword(showNotification = false) {
       const passwordElement = document.getElementById('password');
       const password = passwordElement.dataset.password || passwordElement.textContent;
       
@@ -222,6 +222,10 @@
       tempTextarea.select();
       document.execCommand('copy');
       document.body.removeChild(tempTextarea);
+      
+      if (showNotification) {
+        showToast('Copied!');
+      }
     }
 
     function adjustTooltipPosition() {
@@ -382,6 +386,78 @@
       setAnimationPreference(newEnabled);
       applyAnimations(newEnabled);
     }
+
+    // Auto Clipboard management functions
+    function getAutoClipboardPreference() {
+      const saved = localStorage.getItem('autoClipboardEnabled');
+      if (saved !== null) {
+        return saved === 'true';
+      }
+      return false; // Default to disabled
+    }
+
+    function setAutoClipboardPreference(enabled) {
+      localStorage.setItem('autoClipboardEnabled', enabled.toString());
+    }
+
+    function updateAutoClipboardIcon(enabled) {
+      const autoClipboardToggle = document.getElementById('auto-clipboard-toggle');
+      if (!autoClipboardToggle) return;
+      
+      const enabledIcon = autoClipboardToggle.querySelector('.clipboard-enabled');
+      const disabledIcon = autoClipboardToggle.querySelector('.clipboard-disabled');
+      
+      if (enabled) {
+        enabledIcon.style.display = 'block';
+        disabledIcon.style.display = 'none';
+        autoClipboardToggle.title = 'Auto-copy to clipboard is ON';
+      } else {
+        enabledIcon.style.display = 'none';
+        disabledIcon.style.display = 'block';
+        autoClipboardToggle.title = 'Auto-copy to clipboard is OFF';
+      }
+    }
+
+    function toggleAutoClipboard() {
+      const currentEnabled = getAutoClipboardPreference();
+      const newEnabled = !currentEnabled;
+      
+      setAutoClipboardPreference(newEnabled);
+      updateAutoClipboardIcon(newEnabled);
+    }
+
+    // Toast notification function
+    function showToast(message, duration = 3000) {
+      // Remove any existing toast
+      const existingToast = document.querySelector('.toast');
+      if (existingToast) {
+        existingToast.remove();
+      }
+
+      // Create new toast
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      
+      // Add to document
+      document.body.appendChild(toast);
+      
+      // Trigger show animation
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 10);
+      
+      // Auto hide after duration
+      setTimeout(() => {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+          }
+        }, 300);
+      }, duration);
+    }
   </script>
   <script>
     window.onload = function () {
@@ -392,6 +468,10 @@
       // Initialize animations
       const savedAnimations = getAnimationPreference();
       applyAnimations(savedAnimations);
+      
+      // Initialize auto-clipboard
+      const savedAutoClipboard = getAutoClipboardPreference();
+      updateAutoClipboardIcon(savedAutoClipboard);
       
       // Page load animations disabled to prevent blue background animation and scroll issues
       
@@ -431,6 +511,11 @@
         const password = generatePassword(length, options);
         displayPassword(password, options.colorCoded);
         save_options(options);
+        
+        // Auto-copy to clipboard if enabled
+        if (getAutoClipboardPreference()) {
+          copyPassword(true); // true = show notification
+        }
       }
 
       form.addEventListener('submit', event => {
@@ -458,6 +543,12 @@
       document.getElementById('animation-toggle').addEventListener('click', event => {
         event.preventDefault();
         toggleAnimations();
+      });
+
+      // Add event listener for auto-clipboard toggle button
+      document.getElementById('auto-clipboard-toggle').addEventListener('click', event => {
+        event.preventDefault();
+        toggleAutoClipboard();
       });
 
       // Add event listener for colorCoded checkbox to re-render password and save setting
@@ -907,6 +998,58 @@
       animation: spin 2s linear infinite;
     }
 
+    .auto-clipboard-toggle {
+      background-color: var(--theme-btn-bg);
+      color: var(--theme-btn-color);
+      border: 1px solid var(--theme-btn-border);
+      border-radius: .25rem;
+      padding: .375rem .5rem;
+      margin-left: 10px;
+      cursor: pointer;
+      transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+    }
+
+    .auto-clipboard-toggle:hover {
+      background-color: var(--theme-btn-hover-bg);
+    }
+
+    .auto-clipboard-toggle svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Toast notification styles */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: var(--theme-btn-bg);
+      color: var(--text-color);
+      border: 1px solid var(--theme-btn-border);
+      border-radius: .25rem;
+      padding: 12px 16px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease-in-out;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .toast.hide {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+
     /* Animation keyframes */
     @keyframes spin {
       from { transform: rotate(0deg); }
@@ -1220,6 +1363,19 @@ Full: All special characters including symbols that some sites may not accept.</
                 <svg class="animation-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="3"></circle>
                   <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m15.5-6.5l-4.5 4.5m-6-6l4.5 4.5m4.5-10.5l-4.5 4.5m-6 6l4.5-4.5"></path>
+                </svg>
+              </button>
+              <button type="button" id="auto-clipboard-toggle" class="auto-clipboard-toggle" title="Auto-copy to clipboard is OFF">
+                <!-- Clipboard icon (enabled state) -->
+                <svg class="clipboard-icon clipboard-enabled" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                </svg>
+                <!-- Clipboard with slash icon (disabled state) -->
+                <svg class="clipboard-icon clipboard-disabled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                  <line x1="2" y1="2" x2="22" y2="22"></line>
                 </svg>
               </button>
             </div>
