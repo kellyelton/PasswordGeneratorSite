@@ -446,9 +446,18 @@
         toggleAnimations();
       });
 
-      // Add event listener for colorCoded checkbox to regenerate password
+      // Add event listener for colorCoded checkbox to re-render password and save setting
       form.elements.colorCoded.addEventListener('change', event => {
-        generateAndSavePassword();
+        const passwordElement = document.getElementById('password');
+        const currentPassword = passwordElement.dataset.password || passwordElement.textContent;
+        if (currentPassword) {
+          displayPassword(currentPassword, event.target.checked);
+        }
+        
+        // Save only the colorCoded setting to localStorage
+        const currentOptions = load_options() || {};
+        currentOptions.colorCoded = event.target.checked;
+        save_options(currentOptions);
       });
 
       // Add event listeners for all form inputs to regenerate password on change
