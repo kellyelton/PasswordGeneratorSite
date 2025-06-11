@@ -700,6 +700,23 @@
       overflow-wrap: break-word;
     }
 
+    /* Constrain password box size to match input fields */
+    #password {
+      max-width: 400px;
+      width: auto;
+      min-height: calc(1.5em + .75rem + 2px);
+      height: auto;
+      padding: .375rem .75rem;
+    }
+
+    /* Responsive design for mobile devices */
+    @media (max-width: 768px) {
+      #password {
+        max-width: calc(100vw - 80px);
+        width: auto;
+      }
+    }
+
     .password-number {
       color: #dc3545;
       font-weight: 500;
