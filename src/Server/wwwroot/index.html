@@ -28,6 +28,7 @@
       includeSpecial: true,
       includeAmbiguous: false,
       characterProfile: 'conservative',
+      colorCoded: false,
     };
 
     function generatePassword(length, options) {
@@ -118,6 +119,30 @@
 
       return password;
     }
+
+    function displayPassword(password, colorCoded) {
+      const passwordElement = document.getElementById('password');
+      
+      if (colorCoded) {
+        // Create colored HTML version
+        const coloredHtml = password
+          .split('')
+          .map(char => {
+            if (/\d/.test(char)) {
+              return `<span class="password-number">${char}</span>`;
+            }
+            return char;
+          })
+          .join('');
+        passwordElement.innerHTML = coloredHtml;
+      } else {
+        // Display as plain text
+        passwordElement.textContent = password;
+      }
+      
+      // Store the plain text password for copying
+      passwordElement.dataset.password = password;
+    }
     function save_options(options) {
       var storage = {};
       // options is an object with name/value pairs
@@ -152,14 +177,16 @@
       }
     }
     function copyPassword() {
-      // Select the password input
-      var passwordInput = document.querySelector('#password');
-
-      // Select the text in the input
-      passwordInput.select();
-
-      // Copy the text to the clipboard
+      const passwordElement = document.getElementById('password');
+      const password = passwordElement.dataset.password || passwordElement.textContent;
+      
+      // Create a temporary textarea to copy the plain text password
+      const tempTextarea = document.createElement('textarea');
+      tempTextarea.value = password;
+      document.body.appendChild(tempTextarea);
+      tempTextarea.select();
       document.execCommand('copy');
+      document.body.removeChild(tempTextarea);
     }
 
     function adjustTooltipPosition() {
@@ -243,10 +270,11 @@
           includeSpecial: form.elements.includeSpecial.checked,
           includeAmbiguous: form.elements.includeAmbiguous.checked,
           characterProfile: form.elements.characterProfile.value,
+          colorCoded: form.elements.colorCoded.checked,
         };
 
         const password = generatePassword(length, options);
-        passwordInput.value = password;
+        displayPassword(password, options.colorCoded);
         save_options(options);
       });
 
@@ -481,6 +509,22 @@
       vertical-align: baseline;
       margin-top: -2px;
     }
+
+    .password-display {
+      font-family: 'Courier New', 'Monaco', monospace;
+      letter-spacing: 1px;
+      word-break: break-all;
+      white-space: pre-wrap;
+      user-select: all;
+      -webkit-user-select: all;
+      -moz-user-select: all;
+      -ms-user-select: all;
+    }
+
+    .password-number {
+      color: #dc3545;
+      font-weight: 500;
+    }
   </style>
 </head>
 
@@ -565,13 +609,22 @@ Full: All special characters including symbols that some sites may not accept.</
               </span>
             </label>
           </div>
+          <div class="form-group form-check">
+            <input type="checkbox" name="colorCoded" class="form-check-input">
+            <label class="form-check-label">Color-coded characters
+              <span class="tooltip">
+                <div class="tooltip-icon">?</div>
+                <span class="tooltiptext">Display numbers in a different color (red) to distinguish them from letters in the generated password.</span>
+              </span>
+            </label>
+          </div>
           <div class="form-group">
             <button type="submit" class="btn btn-primary">Generate password</button>
             <button type="reset" class="btn btn-secondary">Reset</button>
           </div>
           <div id="password-container" class="form-group">
             <label for="password">Password:</label>
-            <input type="text" id="password" readonly class="form-control">
+            <div id="password" class="form-control password-display" readonly tabindex="0"></div>
           </div>
           <div class="form-group">
             <button type="button" id="copypassword" class="btn btn-primary">
