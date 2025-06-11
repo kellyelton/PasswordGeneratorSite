@@ -1,0 +1,27 @@
+{
+  "name": "pwd.guru - Password Generator",
+  "short_name": "pwd.guru",
+  "description": "Secure password generator with no ads, no tracking, no BS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png", 
+      "sizes": "512x512",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["productivity", "utilities", "security"],
+  "lang": "en"
+}
