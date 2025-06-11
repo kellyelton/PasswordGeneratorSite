@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>404 - Page Not Found | Password Generator</title>
+  <meta content='width=device-width, initial-scale=1' name='viewport' />
+  <meta name="description" content="Page not found">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <script>
+    // Theme management functions
+    function getThemePreference() {
+      const saved = localStorage.getItem('theme');
+      if (saved) {
+        return saved;
+      }
+      return 'system';
+    }
+
+    function setThemePreference(theme) {
+      localStorage.setItem('theme', theme);
+    }
+
+    function applyTheme(theme) {
+      const html = document.documentElement;
+      
+      if (theme === 'system') {
+        html.removeAttribute('data-theme');
+      } else {
+        html.setAttribute('data-theme', theme);
+      }
+      
+      updateThemeIcon(theme);
+    }
+
+    function updateThemeIcon(theme) {
+      const systemIcon = document.getElementById('system-icon');
+      const lightIcon = document.getElementById('light-icon');
+      const darkIcon = document.getElementById('dark-icon');
+      
+      if (!systemIcon || !lightIcon || !darkIcon) return;
+      
+      // Hide all icons
+      systemIcon.style.display = 'none';
+      lightIcon.style.display = 'none';
+      darkIcon.style.display = 'none';
+      
+      // Show the appropriate icon
+      if (theme === 'system') {
+        systemIcon.style.display = 'block';
+      } else if (theme === 'light') {
+        lightIcon.style.display = 'block';
+      } else if (theme === 'dark') {
+        darkIcon.style.display = 'block';
+      }
+    }
+
+    function toggleTheme() {
+      const currentTheme = getThemePreference();
+      let nextTheme;
+      
+      if (currentTheme === 'system') {
+        nextTheme = 'light';
+      } else if (currentTheme === 'light') {
+        nextTheme = 'dark';
+      } else {
+        nextTheme = 'system';
+      }
+      
+      setThemePreference(nextTheme);
+      applyTheme(nextTheme);
+    }
+
+    window.onload = function () {
+      // Initialize theme
+      const savedTheme = getThemePreference();
+      applyTheme(savedTheme);
+      
+      var hostname = window.location.hostname.split('.').slice(-2).join('.');
+      var hostnameparts = hostname.split('.');
+
+      if (hostnameparts.length == 1) {
+        hostname = hostnameparts[0].toLowerCase();
+      } else if (hostnameparts.length == 2) {
+        hostname = hostnameparts[0].toLowerCase() + "." + hostnameparts[1].toUpperCase();
+      }
+
+      document.getElementById("host").innerHTML = hostname;
+    };
+  </script>
+
+  <style>
+    :root {
+      /* Light theme variables */
+      --bg-color: #ffffff;
+      --bg-body: #171026;
+      --text-color: #495057;
+      --border-color: #ced4da;
+      --focus-border-color: #80bdff;
+      --focus-shadow: rgba(0, 123, 255, .25);
+      --btn-primary-bg: #007bff;
+      --btn-primary-border: #007bff;
+      --btn-primary-hover-bg: #0069d9;
+      --btn-primary-hover-border: #0062cc;
+      --btn-secondary-bg: #6c757d;
+      --btn-secondary-border: #6c757d;
+      --btn-secondary-hover-bg: #5a6268;
+      --btn-secondary-hover-border: #545b62;
+      --tooltip-bg: #333;
+      --tooltip-border: #333;
+      --tooltip-icon-bg: #007bff;
+      --footer-border: #276fd7;
+      --footer-support-bg: #dfdaff;
+      --footer-support-border: #d74a4a;
+      --host-color: #0c5fac;
+      --subtitle-color: #a3b5c5;
+      --theme-btn-bg: #ffffff;
+      --theme-btn-color: #495057;
+      --theme-btn-border: #ced4da;
+      --theme-btn-hover-bg: #f8f9fa;
+    }
+
+    [data-theme="dark"] {
+      /* Dark theme variables */
+      --bg-color: #1a1a1a;
+      --bg-body: #0d0d0d;
+      --text-color: #e0e0e0;
+      --border-color: #404040;
+      --focus-border-color: #4d94ff;
+      --focus-shadow: rgba(77, 148, 255, .25);
+      --btn-primary-bg: #0d6efd;
+      --btn-primary-border: #0d6efd;
+      --btn-primary-hover-bg: #0b5ed7;
+      --btn-primary-hover-border: #0a58ca;
+      --btn-secondary-bg: #6c757d;
+      --btn-secondary-border: #6c757d;
+      --btn-secondary-hover-bg: #5c636a;
+      --btn-secondary-hover-border: #565e64;
+      --tooltip-bg: #2a2a2a;
+      --tooltip-border: #2a2a2a;
+      --tooltip-icon-bg: #0d6efd;
+      --footer-border: #4d94ff;
+      --footer-support-bg: #2a2a2a;
+      --footer-support-border: #dc3545;
+      --host-color: #4d94ff;
+      --subtitle-color: #9ca3af;
+      --theme-btn-bg: #2a2a2a;
+      --theme-btn-color: #e0e0e0;
+      --theme-btn-border: #404040;
+      --theme-btn-hover-bg: #404040;
+    }
+
+    /* Use system preference when no explicit theme is set */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --bg-color: #1a1a1a;
+        --bg-body: #0d0d0d;
+        --text-color: #e0e0e0;
+        --border-color: #404040;
+        --focus-border-color: #4d94ff;
+        --focus-shadow: rgba(77, 148, 255, .25);
+        --btn-primary-bg: #0d6efd;
+        --btn-primary-border: #0d6efd;
+        --btn-primary-hover-bg: #0b5ed7;
+        --btn-primary-hover-border: #0a58ca;
+        --btn-secondary-bg: #6c757d;
+        --btn-secondary-border: #6c757d;
+        --btn-secondary-hover-bg: #5c636a;
+        --btn-secondary-hover-border: #565e64;
+        --tooltip-bg: #2a2a2a;
+        --tooltip-border: #2a2a2a;
+        --tooltip-icon-bg: #0d6efd;
+        --footer-border: #4d94ff;
+        --footer-support-bg: #2a2a2a;
+        --footer-support-border: #dc3545;
+        --host-color: #4d94ff;
+        --subtitle-color: #9ca3af;
+        --theme-btn-bg: #2a2a2a;
+        --theme-btn-color: #e0e0e0;
+        --theme-btn-border: #404040;
+        --theme-btn-hover-bg: #404040;
+      }
+    }
+
+    .btn {
+      display: inline-block;
+      font-weight: 400;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: middle;
+      border: 1px solid transparent;
+      padding: .375rem .75rem;
+      font-size: 1rem;
+      line-height: 1.5;
+      border-radius: .25rem;
+      transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      color: #fff;
+      background-color: var(--btn-primary-bg);
+      border-color: var(--btn-primary-border);
+    }
+
+    .btn-primary:hover {
+      color: #fff;
+      background-color: var(--btn-primary-hover-bg);
+      border-color: var(--btn-primary-hover-border);
+    }
+
+    .theme-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: var(--theme-btn-bg);
+      color: var(--theme-btn-color);
+      border: 1px solid var(--theme-btn-border);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+
+    .theme-btn:hover {
+      background-color: var(--theme-btn-hover-bg);
+    }
+
+    .theme-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background-color: var(--bg-body);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .error-code {
+      font-size: 6rem;
+      font-weight: bold;
+      color: var(--host-color);
+      margin: 0;
+      line-height: 1;
+    }
+
+    .error-title {
+      font-size: 2rem;
+      margin: 20px 0;
+      color: var(--text-color);
+    }
+
+    .error-message {
+      font-size: 1.2rem;
+      margin: 20px 0;
+      color: var(--subtitle-color);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .home-link {
+      margin-top: 30px;
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      padding: 10px;
+      border-top: 1px solid var(--footer-border);
+      background-color: var(--bg-body);
+      font-size: 0.9rem;
+      color: var(--subtitle-color);
+    }
+
+    @media (max-width: 768px) {
+      .error-code {
+        font-size: 4rem;
+      }
+      
+      .error-title {
+        font-size: 1.5rem;
+      }
+      
+      .error-message {
+        font-size: 1rem;
+        padding: 0 20px;
+      }
+      
+      .theme-btn {
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+      }
+      
+      .theme-icon {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Theme toggle button -->
+  <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">
+    <!-- System theme icon -->
+    <svg id="system-icon" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+      <line x1="8" y1="21" x2="16" y2="21"></line>
+      <line x1="12" y1="17" x2="12" y2="21"></line>
+    </svg>
+    <!-- Light theme icon -->
+    <svg id="light-icon" class="theme-icon" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+    <!-- Dark theme icon -->
+    <svg id="dark-icon" class="theme-icon" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+    </svg>
+  </button>
+
+  <div class="container">
+    <h1 class="error-code">404</h1>
+    <h2 class="error-title">Page Not Found</h2>
+    <p class="error-message">
+      Sorry, the page you are looking for doesn't exist. It might have been moved, deleted, or you entered the wrong URL.
+    </p>
+    <div class="home-link">
+      <a href="/" class="btn btn-primary">Return to Password Generator</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Powered by <span id="host"></span></p>
+  </div>
+</body>
+
+</html>

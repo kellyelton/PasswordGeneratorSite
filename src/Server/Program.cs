@@ -23,6 +23,9 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// Configure status code pages for custom error pages
+app.UseStatusCodePagesWithReExecute("/404.html");
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
